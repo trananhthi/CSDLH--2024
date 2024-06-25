@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutaBuss", "FutaBuss\FutaBuss.csproj", "{3EA83D7C-C428-4909-8BCE-0BE897EA0402}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3EA83D7C-C428-4909-8BCE-0BE897EA0402}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EA83D7C-C428-4909-8BCE-0BE897EA0402}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EA83D7C-C428-4909-8BCE-0BE897EA0402}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EA83D7C-C428-4909-8BCE-0BE897EA0402}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50C211F8-199A-4B47-8192-202487BC2D1C}
+	EndGlobalSection
+EndGlobal
