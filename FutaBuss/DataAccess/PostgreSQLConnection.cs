@@ -42,6 +42,7 @@ namespace FutaBuss.DataAccess
 
             try
             {
+                OpenConnection();
                 string query = "SELECT code, name FROM provinces";
                 using var command = new NpgsqlCommand(query, _connection);
                 using var reader = command.ExecuteReader();
@@ -57,6 +58,10 @@ namespace FutaBuss.DataAccess
             {
                 throw new ApplicationException("PostgreSQL query error: " + ex.Message, ex);
             }
+            finally
+            {
+                CloseConnection();
+            }
 
             return provinces;
         }
@@ -65,6 +70,7 @@ namespace FutaBuss.DataAccess
         {
             try
             {
+                OpenConnection();
                 string query = "SELECT code, name FROM provinces WHERE code = @code";
                 using var command = new NpgsqlCommand(query, _connection);
                 command.Parameters.AddWithValue("@code", code);
@@ -84,6 +90,12 @@ namespace FutaBuss.DataAccess
             {
                 throw new ApplicationException("PostgreSQL query error: " + ex.Message, ex);
             }
+            finally
+            {
+                CloseConnection();
+            }
         }
+
+
     }
 }

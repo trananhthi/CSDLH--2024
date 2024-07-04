@@ -20,8 +20,12 @@ namespace FutaBuss
         private IMongoDatabase database;
         private IMongoCollection<Trip> tripsCollection;
         private Trip selectedTrip;
+        List<string> selectedSeatIds = new List<string>();
         int price = 0;
         int seatCount = 0;
+        int paymentFee = 0;
+        string seatText = string.Empty;
+
         public Booking()
         {
             InitializeComponent();
@@ -29,7 +33,7 @@ namespace FutaBuss
 
             tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
 
-            LoadTripData();
+            LoadTripData("0a8804db96c34be69f3dd8e10515d170");
         }
 
         private void InitializeDatabaseConnections()
@@ -42,7 +46,7 @@ namespace FutaBuss
                 _redisConnection = new RedisConnection("redis-18667.c8.us-east-1-2.ec2.cloud.redislabs.com:18667", "default", "dVZCrABvG85l0L9JQI9izqn2SDvvTx82");
 
                 _postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
-                _postgreSQLConnection.OpenConnection();
+
 
             }
             catch (ApplicationException ex)
@@ -53,30 +57,6 @@ namespace FutaBuss
             {
                 MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void CreateButtons(bool top = true)
-        {
-            for (int i = 1; i <= 18; i++)
-            {
-                Button button = new Button
-                {
-                    Content = top ? $"B{i:00}" : $"A{i:00}",
-                    Style = (Style)FindResource("NoHoverButtonStyle"),
-                    Margin = new Thickness(5),
-                };
-                button.Click += SeatButton_Click;
-                if (top)
-                {
-                    SeatGridTop.Children.Add(button);
-                }
-                else
-                {
-                    SeatGridBot.Children.Add(button);
-                }
-
-            }
-
         }
 
         private void SeatButton_Click(object sender, RoutedEventArgs e)
@@ -90,8 +70,19 @@ namespace FutaBuss
                     ImageBrush newBrush = new ImageBrush();
                     if (brush.ImageSource.ToString().Contains("seat_active.png"))
                     {
+                        if (seatCount > 4)
+                        {
+                            MessageBox.Show("Đã chọn đủ số ghế");
+                            return;
+                        }
                         newBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_selecting.png"));
                         price += selectedTrip.Price;
+                        if (!string.IsNullOrEmpty(seatText))
+                        {
+                            seatText += ",";
+                        }
+                        seatText += button.Content.ToString();
+                        selectedSeatIds.Add((string)button.Tag);
                         seatCount++;
 
                     }
@@ -99,22 +90,29 @@ namespace FutaBuss
                     {
                         newBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
                         price -= selectedTrip.Price;
+                        string seatToRemove = button.Content.ToString();
+                        List<string> seats = seatText.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        if (seats.Contains(seatToRemove))
+                        {
+                            seats.Remove(seatToRemove);
+                            seatText = string.Join(",", seats);
+                        }
+                        selectedSeatIds.Remove((string)button.Tag);
                         seatCount--;
                     }
                     SeatCountTextBlock.Text = $"{seatCount} Ghế";
-                    PriceTextBlock.Text = $"{price}d";
+                    PriceTextBlock.Text = $"{price}đ";
+                    SeatTextBlock.Text = seatText;
+                    SeatPriceTextBlock.Text = $"{price}đ";
+                    PaymentFeeTextBlock.Text = $"{paymentFee}đ";
+                    TotalPriceTextBlock.Text = $"{price + paymentFee}đ";
                     button.Background = newBrush;
                 }
             }
         }
 
-        private void LoadTripData()
+        private void LoadTripData(string tripId)
         {
-            // Giả sử bạn đã có tripId từ đâu đó (ví dụ: người dùng chọn từ danh sách chuyến)
-            string tripId = "1df7695e3bf3415fb9b29c903fbe438a";  // Thay thế bằng ID thực tế
-
-            // Truy vấn dữ liệu chuyến đi từ MongoDB
-
             selectedTrip = tripsCollection.Find<Trip>(trip => trip.TripId == tripId).FirstOrDefault();
 
             if (selectedTrip != null)
@@ -129,60 +127,83 @@ namespace FutaBuss
                     }
                 }
                 var destinationProvince = _redisConnection.GetString($"province:{selectedTrip.DestinationProvinceCode}:name");
+                if (destinationProvince == null)
+                {
+                    destinationProvince = _postgreSQLConnection.GetProvinceByCode(selectedTrip.DestinationProvinceCode)?.Name;
+                    if (destinationProvince != null)
+                    {
+                        _redisConnection.SetString($"province:{selectedTrip.DestinationProvinceCode}:name", destinationProvince);
+                    }
+                }
                 // Binding thông tin chuyến đi
                 RouteTextBlock.Text = $"{departureProvince} ➜ {destinationProvince}";
                 DepartureTimeTextBlock.Text = selectedTrip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
                 SeatCountTextBlock.Text = $"{seatCount} Ghế";
-                PriceTextBlock.Text = $"{price}d";
-
+                PriceTextBlock.Text = $"{price}đ";
+                SeatPriceTextBlock.Text = $"{price}đ";
+                PaymentFeeTextBlock.Text = $"{paymentFee}đ";
+                TotalPriceTextBlock.Text = $"{price + paymentFee}đ";
+                PickUpComboBox.ItemsSource = selectedTrip.Transhipments.PickUp.ToList();
+                // Bind drop_off locations to dropOffComboBox
+                DropOffComboBox.ItemsSource = selectedTrip.Transhipments.DropOff.ToList();
                 // Binding cấu hình ghế ngồi
                 LoadSeatConfig(selectedTrip.SeatConfig);
+
             }
         }
 
         private void LoadSeatConfig(SeatConfig seatConfig)
         {
             // Tầng dưới
-            foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == 1).Seats)
+            var floors = seatConfig.Floors;
+            foreach (var floor in floors)
             {
-                Button seatButton = new Button();
-                seatButton.Content = seat.Alias;
-                seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
-                seatButton.Margin = new Thickness(5);
-                seatButton.Click += SeatButton_Click;
-                ImageBrush brush = new ImageBrush();
-                if (seat.Status == "empty")
+                if (floor.Ordinal == 1)
                 {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
+                    SeatGridBot.Rows = floor.NumRows;
+                    SeatGridBot.Columns = floor.NumCols;
                 }
-                else
+                else if (floor.Ordinal == 2)
                 {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
+                    SeatGridTop.Rows = floor.NumRows;
+                    SeatGridTop.Columns = floor.NumCols;
                 }
-                seatButton.Background = brush;
-                SeatGridBot.Children.Add(seatButton);
+                foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == floor.Ordinal).Seats)
+                {
+                    Button seatButton = new Button();
+                    seatButton.Tag = seat.SeatId;
+                    seatButton.Content = seat.Alias;
+                    seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
+                    seatButton.Margin = new Thickness(5);
+                    seatButton.Click += SeatButton_Click;
+                    ImageBrush brush = new ImageBrush();
+                    if (seat.Status == "empty")
+                    {
+                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
+                    }
+                    else
+                    {
+                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
+                    }
+                    seatButton.Background = brush;
+                    if (floor.Ordinal == 1)
+                    {
+                        SeatGridBot.Children.Add(seatButton);
+                    }
+                    else if (floor.Ordinal == 2)
+                    {
+                        SeatGridTop.Children.Add(seatButton);
+                    }
+                }
             }
+        }
 
-            // Tầng trên
-            foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == 2).Seats)
-            {
-                Button seatButton = new Button();
-                seatButton.Content = seat.Alias;
-                seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
-                seatButton.Margin = new Thickness(5);
-                seatButton.Click += SeatButton_Click;
-                ImageBrush brush = new ImageBrush();
-                if (seat.Status == "empty")
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
-                }
-                else
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
-                }
-                seatButton.Background = brush;
-                SeatGridTop.Children.Add(seatButton);
-            }
+        private void btnPayment_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            var window = new MainWindow(selectedSeatIds);
+            window.Owner = this;
+            window.ShowDialog();
         }
     }
 }
