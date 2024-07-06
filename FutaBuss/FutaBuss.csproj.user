@@ -10,12 +10,18 @@
     <Compile Update="View\Booking.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\SearchTrips.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="View\Booking.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\SearchTrips.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

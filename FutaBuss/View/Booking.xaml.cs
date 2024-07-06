@@ -7,12 +7,12 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace FutaBuss
+namespace FutaBuss.View
 {
     /// <summary>
     /// Interaction logic for Booking.xaml
     /// </summary>
-    public partial class Booking : Window
+    public partial class Booking : Page
     {
         private MongoDBConnection _mongoDBConnection;
         private RedisConnection _redisConnection;
@@ -40,16 +40,22 @@ namespace FutaBuss
             LoadTripData("0a8804db96c34be69f3dd8e10515d170", "1df7695e3bf3415fb9b29c903fbe438a");
         }
 
+        
+
         private void InitializeDatabaseConnections()
         {
             try
             {
                 // Kết nối MongoDB
-                _mongoDBConnection = new MongoDBConnection("mongodb+srv://thuannt:J396QWpWuiGDZhOs@thuannt.yzjzr9s.mongodb.net/?appName=ThuanNT", "futabus");
+                //_mongoDBConnection = new MongoDBConnection("mongodb+srv://thuannt:J396QWpWuiGDZhOs@thuannt.yzjzr9s.mongodb.net/?appName=ThuanNT", "futabus");
 
-                _redisConnection = new RedisConnection("redis-18667.c8.us-east-1-2.ec2.cloud.redislabs.com:18667", "default", "dVZCrABvG85l0L9JQI9izqn2SDvvTx82");
+                //_redisConnection = new RedisConnection("redis-18667.c8.us-east-1-2.ec2.cloud.redislabs.com:18667", "default", "dVZCrABvG85l0L9JQI9izqn2SDvvTx82");
 
-                _postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
+                //_postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
+
+                _mongoDBConnection = MongoDBConnection.Instance;
+                _redisConnection = RedisConnection.Instance;
+                _postgreSQLConnection = PostgreSQLConnection.Instance;
 
 
             }
@@ -354,15 +360,15 @@ namespace FutaBuss
             }
             Guid booking_id = Guid.NewGuid();
             _redisConnection.CacheBooking(booking_id, userId, selectedSeatIds);
-            this.Hide();
-            var window = new MainWindow(selectedSeatIds);
-            window.Owner = this;
-            window.ShowDialog();
+            //this.Hide();
+            //var window = new MainWindow(selectedSeatIds);
+            //window.Owner = this;
+            //window.ShowDialog();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            //this.Close();
         }
 
         private void TxtName_LostFocus(object sender, RoutedEventArgs e)
@@ -415,5 +421,7 @@ namespace FutaBuss
                 return false;
             }
         }
+
+        
     }
 }

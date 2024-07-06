@@ -7,16 +7,26 @@ namespace FutaBuss
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow(List<string> seatIds)
+        public MainWindow()
         {
             InitializeComponent();
-            SeatIdsTextBlock.Text = "Selected Seat IDs: " + string.Join(", ", seatIds);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+        private void closeWindowButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Owner.Visibility = Visibility.Visible;
             this.Close();
+        }
+
+        private void minimizeWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new FutaBuss.View.SearchTrips());
         }
     }
 }
