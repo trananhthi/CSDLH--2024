@@ -17,6 +17,7 @@ namespace FutaBuss.View
         private MongoDBConnection _mongoDBConnection;
         private RedisConnection _redisConnection;
         private PostgreSQLConnection _postgreSQLConnection;
+        private CassandraDBConnection _cassandraDBConnection;
         private MongoClient client;
         private IMongoDatabase database;
         private IMongoCollection<Trip> tripsCollection;
@@ -56,6 +57,10 @@ namespace FutaBuss.View
                 _mongoDBConnection = MongoDBConnection.Instance;
                 _redisConnection = RedisConnection.Instance;
                 _postgreSQLConnection = PostgreSQLConnection.Instance;
+                _cassandraDBConnection = CassandraDBConnection.Instance;
+
+                
+
 
 
             }
