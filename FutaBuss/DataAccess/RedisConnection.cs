@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace FutaBuss.DataAccess
 {
@@ -44,6 +45,29 @@ namespace FutaBuss.DataAccess
             catch (Exception ex)
             {
                 throw new ApplicationException("Redis get string error: " + ex.Message, ex);
+            }
+        }
+
+        public void CacheBooking(Guid id, int? userId, List<string> seatIds)
+        {
+            var bookingData = new Dictionary<string, string>();
+
+            foreach (var seatId in seatIds)
+            {
+                var key = $"booking:{id}:seat:{seatId}";
+                var value = JsonConvert.SerializeObject(new
+                {
+                    UserId = userId,
+                    SeatId = seatId
+                });
+                bookingData[key] = value;
+            }
+
+            var expiry = TimeSpan.FromMinutes(15);
+
+            foreach (var item in bookingData)
+            {
+                _db.StringSet(item.Key, item.Value, expiry);
             }
         }
     }

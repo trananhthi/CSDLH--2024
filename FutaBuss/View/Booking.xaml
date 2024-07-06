@@ -99,70 +99,261 @@
             <ColumnDefinition Width="7*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-
-        <!-- Seat Selection -->
-        <GroupBox Grid.Row="0" Grid.Column="0" >
-            <GroupBox.Header>
-                <TextBlock Text="Chọn ghế" Margin="10, 0" FontSize="28" VerticalAlignment="Center"></TextBlock>
-            </GroupBox.Header>
-            <Grid>
+        <TabControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <TabItem Header="Chuyến đi" FontSize="14">
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="7*" />
+                    <ColumnDefinition Width="3*" />
                 </Grid.ColumnDefinitions>
+                    <GroupBox Grid.Row="0" Grid.Column="0" >
+                        <GroupBox.Header>
+                            <TextBlock Text="Chọn ghế" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                        </GroupBox.Header>
+                        <Grid x:Name="SeatConfigGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Chuyến đi -->
+     
+                            <TextBlock Text="Tầng dưới" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20" />
+                            <UniformGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="DepartureSeatGridBot">
+                            </UniformGrid>
+
+                            <!-- Tầng trên -->
+                            <TextBlock Text="Tầng trên" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20" />
+                            <UniformGrid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="DepartureSeatGridTop">
+                            </UniformGrid>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="8" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#D5D9DD" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Đã bán"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#DEF3FF" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Còn trống"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#FDEDE8" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Đang chọn"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
-                <!-- Tầng dưới -->
-                <TextBlock Text="Tầng dưới" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20"/>
-                <UniformGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="SeatGridBot">
-
-                </UniformGrid>
-
-                <!-- Tầng trên -->
-                <TextBlock Text="Tầng trên" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20"/>
-                <UniformGrid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="SeatGridTop">
-                    <!-- Tầng trên: B1-B20 -->
-
-                </UniformGrid>
-
-                <!-- Legend -->
-                <StackPanel Grid.Row="1" Grid.Column="5" HorizontalAlignment="Left" Margin="10">
-                    <StackPanel Orientation="Horizontal" Margin="10">
-                        <Rectangle Fill="#D5D9DD" Width="20" Height="20" Margin="0,0,5,0"/>
-                        <TextBlock Text="Đã bán"/>
+                <GroupBox Grid.Row="0" Grid.Column="0">
+                    <GroupBox.Header>
+                        <TextBlock Text="Thông tin lượt đi" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel Margin="10">
+                        <UniformGrid Columns="2">
+                            <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="0">
+                                <TextBlock Text="Tuyến xe:" FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Thời gian xuất bến:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Số lượng ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Số ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Tổng tiền lượt đi:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="1">
+                                <TextBlock FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Right" x:Name="RouteTextBlock"/>
+                                <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="DepartureTimeTextBlock"/>
+                                <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="SeatCountTextBlock"/>
+                                <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="SeatTextBlock"/>
+                                <TextBlock Foreground="#00613D" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="TotalDeparturePriceTextBlock"/>
+                            </StackPanel>
+                        </UniformGrid>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="10">
-                        <Rectangle Fill="#DEF3FF" Width="20" Height="20" Margin="0,0,5,0"/>
-                        <TextBlock Text="Còn trống"/>
+                </GroupBox>
+                <!-- Route Information -->
+                <GroupBox Grid.Row="1" Grid.Column="0">
+                    <GroupBox.Header>
+                        <TextBlock Text="Thông tin đón trả" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Điểm đón" Margin="0,0,0,5" FontSize="15"/>
+                        <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="PickUpComboBox" SelectedIndex="0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="14">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}, {1}, {2}">
+                                                <Binding Path="Location" />
+                                                <Binding Path="Time" />
+                                                <Binding Path="Detail" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="Điểm trả" Margin="0,0,0,5" FontSize="15"/>
+                        <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="DropOffComboBox" SelectedIndex="0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="14">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}, {1}, {2}">
+                                                <Binding Path="Location" />
+                                                <Binding Path="Time" />
+                                                <Binding Path="Detail" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="10">
-                        <Rectangle Fill="#FDEDE8" Width="20" Height="20" Margin="0,0,5,0"/>
-                        <TextBlock Text="Đang chọn"/>
-                    </StackPanel>
-                </StackPanel>
+                </GroupBox>
             </Grid>
-        </GroupBox>
+        </Grid>
+            </TabItem>
+            <TabItem Header="Chuyến về" FontSize="14" Visibility="Collapsed" x:Name="ReturnTab">
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="7*" />
+                        <ColumnDefinition Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Grid.Row="0" Grid.Column="0" >
+                        <GroupBox.Header>
+                            <TextBlock Text="Chọn ghế" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                        </GroupBox.Header>
+                        <Grid x:Name="ReturnSeatConfigGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
+                            <!-- Chuyến đi -->
+
+                            <TextBlock Text="Tầng dưới" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20" />
+                            <UniformGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="ReturnSeatGridBot">
+                            </UniformGrid>
+
+                            <!-- Tầng trên -->
+                            <TextBlock Text="Tầng trên" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="5,0" FontSize="20" />
+                            <UniformGrid Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Rows="6" Columns="3" HorizontalAlignment="Center" Margin="10" Height="Auto" Width="200" x:Name="ReturnSeatGridTop">
+                            </UniformGrid>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="8" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#D5D9DD" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Đã bán"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#DEF3FF" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Còn trống"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="10">
+                                    <Rectangle Fill="#FDEDE8" Width="20" Height="20" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Đang chọn"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    <Grid Grid.Row="0" Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Grid.Row="0" Grid.Column="0">
+                            <GroupBox.Header>
+                                <TextBlock Text="Thông tin lượt về" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                            </GroupBox.Header>
+                            <StackPanel Margin="10">
+                                <UniformGrid Columns="2">
+                                    <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="0">
+                                        <TextBlock Text="Tuyến xe:" FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="Thời gian xuất bến:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="Số lượng ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="Số ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="Tổng tiền lượt về:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="1">
+                                        <TextBlock FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Right" x:Name="ReturnRouteTextBlock"/>
+                                        <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="ReturnDepartureTimeTextBlock"/>
+                                        <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="ReturnSeatCountTextBlock"/>
+                                        <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="ReturnSeatTextBlock"/>
+                                        <TextBlock Foreground="#00613D" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="TotalReturnPriceTextBlock"/>
+                                    </StackPanel>
+                                </UniformGrid>
+                            </StackPanel>
+                        </GroupBox>
+                        <!-- Route Information -->
+                        <GroupBox Grid.Row="1" Grid.Column="0">
+                            <GroupBox.Header>
+                                <TextBlock Text="Thông tin đón trả" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
+                            </GroupBox.Header>
+                            <StackPanel Margin="10">
+                                <TextBlock Text="Điểm đón" Margin="0,0,0,5" FontSize="15"/>
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnPickUpComboBox" SelectedIndex="0">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="14">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}, {1}, {2}">
+                                                        <Binding Path="Location" />
+                                                        <Binding Path="Time" />
+                                                        <Binding Path="Detail" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Text="Điểm trả" Margin="0,0,0,5" FontSize="15"/>
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnDropOffComboBox" SelectedIndex="0">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="14">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}, {1}, {2}">
+                                                        <Binding Path="Location" />
+                                                        <Binding Path="Time" />
+                                                        <Binding Path="Detail" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
         <GroupBox Grid.Row="1" Grid.Column="0">
-
             <GroupBox.Header>
-                <TextBlock Text="Thông tin khách hàng" Margin="10, 0" FontSize="28" VerticalAlignment="Center"></TextBlock>
+                <TextBlock Text="Thông tin khách hàng" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
             </GroupBox.Header>
             <UniformGrid Columns="2">
                 <StackPanel Margin="10,10,10,0" Grid.Column="0">
-                    <TextBlock Text="Họ và tên" Margin="0,0,0,5" FontSize="14"/>
-                    <TextBox Margin="0,0,10,5" FontSize="14"/>
-                    <TextBlock Text="Số điện thoại" Margin="0,0,0,5" FontSize="14"/>
-                    <TextBox Margin="0,0,10,5" FontSize="14"/>
-                    <TextBlock Text="Email" Margin="0,0,0,5" FontSize="14"/>
-                    <TextBox Margin="0,0,10,5" FontSize="14"/>
-                    <CheckBox Content="Chấp nhận điều khoản" Margin="0, 10" FontSize="15"/>
+                    <TextBlock Text="Họ và tên" Margin="0,0,0,5" FontSize="14" />
+                    <TextBox x:Name="TxtName" Margin="0,0,10,5" FontSize="14" LostFocus="TxtName_LostFocus"/>
+                    <TextBlock Text="Số điện thoại" Margin="0,0,0,5" FontSize="14" />
+                    <TextBox x:Name="TxtPhoneNumber" Margin="0,0,10,5" FontSize="14" LostFocus="TxtPhoneNumber_LostFocus"/>
+                    <TextBlock Text="Email" Margin="0,0,0,5" FontSize="14" />
+                    <TextBox x:Name="TxtEmail" Margin="0,0,10,5" FontSize="14" LostFocus="TxtEmail_LostFocus"/>
+                    <CheckBox Content="Chấp nhận điều khoản" Margin="0, 10" FontSize="15" x:Name="chkAccept"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="ĐIỀU KHOẢN &amp; LƯU Ý" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,5,0,15"/>
@@ -172,98 +363,34 @@
             </UniformGrid>
 
         </GroupBox>
-
-        <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="3">
+        <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="6*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <GroupBox Grid.Row="0" Grid.Column="0">
                 <GroupBox.Header>
-                    <TextBlock Text="Thông tin lượt đi" Margin="10, 0" FontSize="28" VerticalAlignment="Center"></TextBlock>
-                </GroupBox.Header>
-                <StackPanel Margin="10">
-                    <UniformGrid Columns="2">
-                        <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="0">
-                            <TextBlock Text="Tuyến xe:" FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Left"/>
-                            <TextBlock Text="Thời gian xuất bến:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
-                            <TextBlock Text="Số lượng ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
-                            <TextBlock Text="Số ghế:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
-                            <TextBlock Text="Tổng tiền lượt đi:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,10" Orientation="Vertical" Grid.Column="1">
-                            <TextBlock FontSize="15" Margin="0,0,0,10" HorizontalAlignment="Right" x:Name="RouteTextBlock"/>
-                            <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="DepartureTimeTextBlock"/>
-                            <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="SeatCountTextBlock"/>
-                            <TextBlock Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="SeatTextBlock"/>
-                            <TextBlock Foreground="#00613D" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="PriceTextBlock"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </GroupBox>
-            <!-- Route Information -->
-            <GroupBox Grid.Row="1" Grid.Column="0">
-                <GroupBox.Header>
-                    <TextBlock Text="Thông tin đón trả" Margin="10, 0" FontSize="28" VerticalAlignment="Center"></TextBlock>
-                </GroupBox.Header>
-                <StackPanel Margin="10">
-                    <TextBlock Text="Điểm đón" Margin="0,0,0,10" FontSize="15"/>
-                    <ComboBox Margin="0,0,0,10" FontSize="15" x:Name="PickUpComboBox" SelectedIndex="0">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock FontSize="14">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0}, {1}, {2}">
-                                            <Binding Path="Location" />
-                                            <Binding Path="Time" />
-                                            <Binding Path="Detail" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <TextBlock Text="Điểm trả" Margin="0,0,0,10" FontSize="15"/>
-                    <ComboBox Margin="0,0,0,10" FontSize="15" x:Name="DropOffComboBox" SelectedIndex="0">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock FontSize="14">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0}, {1}, {2}">
-                                            <Binding Path="Location" />
-                                            <Binding Path="Time" />
-                                            <Binding Path="Detail" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Grid.Row="2" Grid.Column="0">
-                <GroupBox.Header>
-                    <TextBlock Text="Chi tiết giá" Margin="10, 0" FontSize="28" VerticalAlignment="Center"></TextBlock>
+                    <TextBlock Text="Chi tiết giá" Margin="10, 0" FontSize="26" VerticalAlignment="Center"></TextBlock>
                 </GroupBox.Header>
                 <UniformGrid Columns="2" Margin="10">
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Giá vé lượt đi:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Giá vé lượt về:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left" Visibility="Collapsed" x:Name="ReturnSeatPriceLabelTextBlock"/>
                         <TextBlock Text="Phí thanh toán:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
                         <TextBlock Text="Tổng tiền:" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Left"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Foreground="#FFFA5400" Text="0đ" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="SeatPriceTextBlock"/>
+                        <TextBlock Foreground="#FFFA5400" Text="0đ" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="DepartureSeatPriceTextBlock"/>
+                        <TextBlock Foreground="#FFFA5400" Text="0đ" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="ReturnSeatPriceTextBlock" Visibility="Collapsed"/>
                         <TextBlock Text="0đ" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="PaymentFeeTextBlock"/>
                         <TextBlock Foreground="#FFFA5400" Text="0đ" Margin="0,0,0,10" FontSize="15" HorizontalAlignment="Right" x:Name="TotalPriceTextBlock"/>
                     </StackPanel>
                 </UniformGrid>
 
             </GroupBox>
-            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="10">
+            <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" Margin="5">
                 <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="0,10,20,10" Width="120">
-                    <Button Style="{DynamicResource ButtonCancelStyle}" Content="Hủy" FontSize="14" Padding="15,10" HorizontalAlignment="Right" Width="120" FontWeight="Bold" Cursor="Hand"/>
+                    <Button Style="{DynamicResource ButtonCancelStyle}" Content="Hủy" FontSize="14" Padding="15,10" HorizontalAlignment="Right" Width="120" FontWeight="Bold" Cursor="Hand" Click="btnCancel_Click"/>
                 </Border>
                 <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="20,10,0,10" Width="120">
                     <Button Content="Thanh toán" FontSize="14" Padding="15,10" Background="#FFFA5400" Foreground="White" HorizontalAlignment="Center" Width="120" FontWeight="Bold" Cursor="Hand" x:Name="btnPayment" Click="btnPayment_Click"/>

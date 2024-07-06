@@ -96,6 +96,27 @@ namespace FutaBuss.DataAccess
             }
         }
 
-
+        public int? AddNewUser(User user)
+        {
+            try
+            {
+                OpenConnection();
+                string query = "INSERT INTO users (fullname, phone, email) VALUES (@fullname, @phone, @email) returning id";
+                using var command = new NpgsqlCommand(query, _connection);
+                command.Parameters.AddWithValue("@fullname", user.FullName);
+                command.Parameters.AddWithValue("@phone", user.PhoneNumber);
+                command.Parameters.AddWithValue("@email", user.Email);
+                int? result = (int?)command.ExecuteScalar();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("PostgreSQL query error: " + ex.Message, ex);
+            }
+            finally
+            {
+                CloseConnection();
+            }
+        }
     }
 }
