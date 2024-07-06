@@ -22,14 +22,18 @@ namespace FutaBuss
         private Trip selectedTrip;
         int price = 0;
         int seatCount = 0;
+
         public Booking()
         {
             InitializeComponent();
             InitializeDatabaseConnections();
 
             tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
+        }
 
-            LoadTripData();
+        public Booking(string tripId) : this()
+        {
+            LoadTripData(tripId);
         }
 
         private void InitializeDatabaseConnections()
@@ -43,7 +47,6 @@ namespace FutaBuss
 
                 _postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
                 _postgreSQLConnection.OpenConnection();
-
             }
             catch (ApplicationException ex)
             {
@@ -55,66 +58,9 @@ namespace FutaBuss
             }
         }
 
-        private void CreateButtons(bool top = true)
+        private void LoadTripData(string tripId)
         {
-            for (int i = 1; i <= 18; i++)
-            {
-                Button button = new Button
-                {
-                    Content = top ? $"B{i:00}" : $"A{i:00}",
-                    Style = (Style)FindResource("NoHoverButtonStyle"),
-                    Margin = new Thickness(5),
-                };
-                button.Click += SeatButton_Click;
-                if (top)
-                {
-                    SeatGridTop.Children.Add(button);
-                }
-                else
-                {
-                    SeatGridBot.Children.Add(button);
-                }
-
-            }
-
-        }
-
-        private void SeatButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            if (button != null)
-            {
-                ImageBrush brush = button.Background as ImageBrush;
-                if (brush != null)
-                {
-                    ImageBrush newBrush = new ImageBrush();
-                    if (brush.ImageSource.ToString().Contains("seat_active.png"))
-                    {
-                        newBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_selecting.png"));
-                        price += selectedTrip.Price;
-                        seatCount++;
-
-                    }
-                    else if (brush.ImageSource.ToString().Contains("seat_selecting.png"))
-                    {
-                        newBrush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
-                        price -= selectedTrip.Price;
-                        seatCount--;
-                    }
-                    SeatCountTextBlock.Text = $"{seatCount} Ghế";
-                    PriceTextBlock.Text = $"{price}d";
-                    button.Background = newBrush;
-                }
-            }
-        }
-
-        private void LoadTripData()
-        {
-            // Giả sử bạn đã có tripId từ đâu đó (ví dụ: người dùng chọn từ danh sách chuyến)
-            string tripId = "1df7695e3bf3415fb9b29c903fbe438a";  // Thay thế bằng ID thực tế
-
             // Truy vấn dữ liệu chuyến đi từ MongoDB
-
             selectedTrip = tripsCollection.Find<Trip>(trip => trip.TripId == tripId).FirstOrDefault();
 
             if (selectedTrip != null)
@@ -129,6 +75,14 @@ namespace FutaBuss
                     }
                 }
                 var destinationProvince = _redisConnection.GetString($"province:{selectedTrip.DestinationProvinceCode}:name");
+                if (destinationProvince == null)
+                {
+                    destinationProvince = _postgreSQLConnection.GetProvinceByCode(selectedTrip.DestinationProvinceCode)?.Name;
+                    if (destinationProvince != null)
+                    {
+                        _redisConnection.SetString($"province:{selectedTrip.DestinationProvinceCode}:name", destinationProvince);
+                    }
+                }
                 // Binding thông tin chuyến đi
                 RouteTextBlock.Text = $"{departureProvince} ➜ {destinationProvince}";
                 DepartureTimeTextBlock.Text = selectedTrip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
@@ -145,43 +99,59 @@ namespace FutaBuss
             // Tầng dưới
             foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == 1).Seats)
             {
-                Button seatButton = new Button();
-                seatButton.Content = seat.Alias;
-                seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
-                seatButton.Margin = new Thickness(5);
+                Button seatButton = new Button
+                {
+                    Content = seat.Alias,
+                    Style = (Style)FindResource("NoHoverButtonStyle"),
+                    Margin = new Thickness(5),
+                    Background = new ImageBrush
+                    {
+                        ImageSource = new BitmapImage(new Uri(seat.Status == "empty"
+                            ? "pack://application:,,,/Images/seat_active.png"
+                            : "pack://application:,,,/Images/seat_disabled.png"))
+                    }
+                };
                 seatButton.Click += SeatButton_Click;
-                ImageBrush brush = new ImageBrush();
-                if (seat.Status == "empty")
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
-                }
-                else
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
-                }
-                seatButton.Background = brush;
                 SeatGridBot.Children.Add(seatButton);
             }
 
             // Tầng trên
             foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == 2).Seats)
             {
-                Button seatButton = new Button();
-                seatButton.Content = seat.Alias;
-                seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
-                seatButton.Margin = new Thickness(5);
+                Button seatButton = new Button
+                {
+                    Content = seat.Alias,
+                    Style = (Style)FindResource("NoHoverButtonStyle"),
+                    Margin = new Thickness(5),
+                    Background = new ImageBrush
+                    {
+                        ImageSource = new BitmapImage(new Uri(seat.Status == "empty"
+                            ? "pack://application:,,,/Images/seat_active.png"
+                            : "pack://application:,,,/Images/seat_disabled.png"))
+                    }
+                };
                 seatButton.Click += SeatButton_Click;
-                ImageBrush brush = new ImageBrush();
-                if (seat.Status == "empty")
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
-                }
-                else
-                {
-                    brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
-                }
-                seatButton.Background = brush;
                 SeatGridTop.Children.Add(seatButton);
+            }
+        }
+
+        private void SeatButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Background is ImageBrush brush)
+            {
+                ImageBrush newBrush = new ImageBrush
+                {
+                    ImageSource = new BitmapImage(new Uri(brush.ImageSource.ToString().Contains("seat_active.png")
+                        ? "pack://application:,,,/Images/seat_selecting.png"
+                        : "pack://application:,,,/Images/seat_active.png"))
+                };
+
+                price += brush.ImageSource.ToString().Contains("seat_active.png") ? selectedTrip.Price : -selectedTrip.Price;
+                seatCount += brush.ImageSource.ToString().Contains("seat_active.png") ? 1 : -1;
+
+                SeatCountTextBlock.Text = $"{seatCount} Ghế";
+                PriceTextBlock.Text = $"{price}d";
+                button.Background = newBrush;
             }
         }
     }

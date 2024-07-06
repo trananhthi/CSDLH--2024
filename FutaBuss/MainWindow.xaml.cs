@@ -8,6 +8,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MongoDB.Bson;
+using System;
+using System.Collections.Generic;
+using MongoDB.Driver;
+
 
 namespace FutaBuss
 {
@@ -16,6 +21,7 @@ namespace FutaBuss
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             InitializeComponent();

@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using FutaBuss.Model;
+using StackExchange.Redis;
 
 namespace FutaBuss.DataAccess
 {
@@ -45,6 +46,26 @@ namespace FutaBuss.DataAccess
             {
                 throw new ApplicationException("Redis get string error: " + ex.Message, ex);
             }
+        }
+
+        public List<Province> GetAllProvinces()
+        {
+            var keys = _redis.GetServer(_redis.GetEndPoints()[0]).Keys(pattern: "province:*:name");
+            var provinces = new List<Province>();
+
+            foreach (var key in keys)
+            {
+                var name = _db.StringGet(key);
+                if (!name.IsNullOrEmpty)
+                {
+                    var code = key.ToString().Split(':')[1];
+                    provinces.Add(new Province (code, name));
+                }
+            }
+
+            provinces = provinces.OrderBy(p => p.Code).ToList();
+
+            return provinces;
         }
     }
 }
