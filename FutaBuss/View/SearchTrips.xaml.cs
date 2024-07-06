@@ -2,21 +2,10 @@
 using FutaBuss.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FutaBuss.View
 {
@@ -33,6 +22,7 @@ namespace FutaBuss.View
         private IMongoCollection<Trip> tripsCollection;
         private Dictionary<string, string> _provinceDictionary;
         private List<BsonDocument> _originalTrips;
+        private List<BsonDocument> _originalRoundTrips;
 
         public SearchTrips()
         {
@@ -112,6 +102,7 @@ namespace FutaBuss.View
                 //_postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
                 //_postgreSQLConnection.OpenConnection();
 
+
                 _mongoDBConnection = MongoDBConnection.Instance;
                 _redisConnection = RedisConnection.Instance;
                 _postgreSQLConnection = PostgreSQLConnection.Instance;
@@ -142,6 +133,8 @@ namespace FutaBuss.View
             string departure = DepartureComboBox.SelectedValue as string;
             string destination = DestinationComboBox.SelectedValue as string;
             DateTime? departureDate = DepartureDatePicker.SelectedDate;
+            DateTime? returnDate = ReturnDatePicker.SelectedDate;
+
 
             if (departureDate == null)
             {
@@ -150,12 +143,18 @@ namespace FutaBuss.View
             }
 
             string departureDateString = departureDate.Value.ToString("yyyy-MM-dd");
+            string returnDateString = returnDate.Value.ToString("yyyy-MM-dd");
             int ticketCount = int.Parse(((ComboBoxItem)TicketCountComboBox.SelectedItem).Content.ToString());
 
             try
             {
                 List<BsonDocument> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString, ticketCount);
                 _originalTrips = trips;
+                if (RoundTrip.IsChecked == true)
+                {
+                    List<BsonDocument> roundTrips = await _mongoDBConnection.SearchRoundTripsAsync(destination, departure, returnDateString, ticketCount);
+                    _originalRoundTrips = roundTrips;
+                }
                 DisplayTrips(trips);
             }
             catch (Exception ex)
@@ -169,6 +168,16 @@ namespace FutaBuss.View
             //string tripId = trip["id"].ToString();
             //Booking bookingWindow = new Booking(tripId);
             //bookingWindow.Show();
+
+
+            //Chuyển như code bên dưới
+            //MainWindow? mainWindow = Application.Current.MainWindow as MainWindow;
+
+
+            //if (mainWindow != null && mainWindow.MainFrame != null)
+            //{
+            //    mainWindow.MainFrame.Navigate(new FutaBuss.View.Book());
+            //}
         }
 
         private int CountEmptySeats(BsonDocument trip)
@@ -204,44 +213,119 @@ namespace FutaBuss.View
             bool afternoon = AfternoonCheckBox.IsChecked ?? false;
             bool evening = EveningCheckBox.IsChecked ?? false;
 
+            if (earlyMorning == false && morning == false && afternoon == false && evening == false)
+            {
+                earlyMorning = true;
+                morning = true;
+                afternoon = true;
+                evening = true;
+            }
+
             bool seatedBus = SeatedBusCheckBox.IsChecked ?? false;
             bool sleeperBus = SleeperBusCheckBox.IsChecked ?? false;
             bool limousine = LimousineCheckBox.IsChecked ?? false;
+
+            if (seatedBus == false && sleeperBus == false && limousine == false)
+            {
+                seatedBus = true;
+                sleeperBus = true;
+                limousine = true;
+            }
 
             bool middleRow = MiddleRowCheckBox.IsChecked ?? false;
             bool frontRow = FrontRowCheckBox.IsChecked ?? false;
             bool lastRow = LastRowCheckBox.IsChecked ?? false;
 
+            if (middleRow == false && frontRow == false && lastRow == false)
+            {
+                middleRow = true;
+                frontRow = true;
+                lastRow = true;
+            }
+
             bool upperFloor = UpperFloorCheckBox.IsChecked ?? false;
             bool lowerFloor = LowerFloorCheckBox.IsChecked ?? false;
 
-            // Lọc các chuyến đi theo các điều kiện đã chọn
-            var filteredTrips = _originalTrips.Where(trip =>
+            if (upperFloor == false && lowerFloor == false)
             {
-                DateTime departureTime = DateTime.Parse(trip["departure_time"].ToString());
+                upperFloor = true;
+                lowerFloor = true;
+            }
+
+            Debug.WriteLine($"Early Morning: {earlyMorning}");
+            Debug.WriteLine($"Morning: {morning}");
+            Debug.WriteLine($"Afternoon: {afternoon}");
+            Debug.WriteLine($"Evening: {evening}");
+            Debug.WriteLine($"Seated Bus: {seatedBus}");
+            Debug.WriteLine($"Sleeper Bus: {sleeperBus}");
+            Debug.WriteLine($"Limousine: {limousine}");
+            Debug.WriteLine($"Middle Row: {middleRow}");
+            Debug.WriteLine($"Front Row: {frontRow}");
+            Debug.WriteLine($"Last Row: {lastRow}");
+            Debug.WriteLine($"Upper Floor: {upperFloor}");
+            Debug.WriteLine($"Lower Floor: {lowerFloor}");
+
+            Debug.WriteLine("ApplyFilters called");
+
+            // Khởi tạo FilteredTrips là ObservableCollection<BsonDocument>
+            List<BsonDocument> FilteredTrips = new List<BsonDocument>();
+
+            // Lặp qua từng chuyến xe trong _originalTrips
+            foreach (var trip in _originalTrips)
+            {
+                // Parse departure time and date
+                DateTime departureDate = DateTime.Parse(trip["departure_date"].ToString());
+                TimeSpan departureTime = TimeSpan.Parse(trip["departure_time"].ToString());
+                DateTime departureDateTime = departureDate.Add(departureTime);
+
                 string tripType = trip["trip_type"].ToString();
 
-                bool timeCondition = (earlyMorning && departureTime.Hour >= 0 && departureTime.Hour < 6) ||
-                                     (morning && departureTime.Hour >= 6 && departureTime.Hour < 12) ||
-                                     (afternoon && departureTime.Hour >= 12 && departureTime.Hour < 18) ||
-                                     (evening && departureTime.Hour >= 18 && departureTime.Hour < 24);
+                // Time condition
+                bool timeCondition = (earlyMorning && departureDateTime.Hour >= 0 && departureDateTime.Hour < 6) ||
+                                     (morning && departureDateTime.Hour >= 6 && departureDateTime.Hour < 12) ||
+                                     (afternoon && departureDateTime.Hour >= 12 && departureDateTime.Hour < 18) ||
+                                     (evening && departureDateTime.Hour >= 18 && departureDateTime.Hour < 24);
+                Debug.WriteLine($"Time Condition for trip {trip["id"]}: {timeCondition}");
 
+                // Type condition
                 bool typeCondition = (seatedBus && tripType == "seated_bus") ||
                                      (sleeperBus && tripType == "sleeper_bus") ||
                                      (limousine && tripType == "limousine");
+                Debug.WriteLine($"Type Condition for trip {trip["id"]}: {typeCondition}");
 
-                bool rowCondition = (middleRow && trip["seat_config"]["rows"]["middle_row"].AsBoolean) ||
-                                    (frontRow && trip["seat_config"]["rows"]["front_row"].AsBoolean) ||
-                                    (lastRow && trip["seat_config"]["rows"]["last_row"].AsBoolean);
+                // Row condition
+                bool rowCondition = false;
+                var floorsArray = trip["seat_config"]["floors"].AsBsonArray;
+                foreach (var floor in floorsArray)
+                {
+                    var seatsArray = floor["seats"].AsBsonArray;
+                    if ((middleRow && seatsArray.Any(seat => seat["alias"].ToString().Contains("middle"))) ||
+                        (frontRow && seatsArray.Any(seat => seat["alias"].ToString().Contains("front"))) ||
+                        (lastRow && seatsArray.Any(seat => seat["alias"].ToString().Contains("last"))))
+                    {
+                        rowCondition = true;
+                        break;
+                    }
+                }
+                Debug.WriteLine($"Row Condition for trip {trip["id"]}: {rowCondition}");
 
-                bool floorCondition = (upperFloor && trip["seat_config"]["floors"]["upper_floor"].AsBoolean) ||
-                                      (lowerFloor && trip["seat_config"]["floors"]["lower_floor"].AsBoolean);
+                // Floor condition
+                bool floorCondition = (upperFloor && floorsArray.Any(floor => floor["ordinal"].ToInt32() == 1)) ||
+                                      (lowerFloor && floorsArray.Any(floor => floor["ordinal"].ToInt32() == 0));
+                Debug.WriteLine($"Floor Condition for trip {trip["id"]}: {floorCondition}");
 
-                // Thêm các điều kiện lọc khác nếu cần
-                return timeCondition && typeCondition && rowCondition && floorCondition;
-            }).ToList();
+                // Kiểm tra tất cả các điều kiện
+                if (timeCondition && typeCondition && rowCondition && floorCondition)
+                {
+                    // Nếu tất cả điều kiện đều đúng, thêm chuyến xe vào FilteredTrips
+                    FilteredTrips.Add(trip);
+                }
+            }
 
-            DisplayTrips(filteredTrips);
+            Debug.WriteLine($"Filtered Trips: {FilteredTrips.Count}");
+
+            // Hiển thị các chuyến xe đã lọc
+            DisplayTrips(FilteredTrips);
         }
 
         private void DisplayTrips(List<BsonDocument> trips)
@@ -294,7 +378,7 @@ namespace FutaBuss.View
                 TextBlock departureTime = new TextBlock
                 {
                     Text = trip["departure_time"].ToString(),
-                    Margin = new Thickness(0, 0, 143, 16),
+                    Margin = new Thickness(0, 10, 143, 16),
                     Width = 150,
                     TextAlignment = TextAlignment.Center
                 };
@@ -308,7 +392,7 @@ namespace FutaBuss.View
                 TextBlock travelTimeBlock = new TextBlock
                 {
                     Text = travelTime,
-                    Margin = new Thickness(161, 0, 22, 0),
+                    Margin = new Thickness(161, 10, 22, 0),
                     Width = 60,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -320,7 +404,7 @@ namespace FutaBuss.View
                 TextBlock arrivalTime = new TextBlock
                 {
                     Text = trip["expected_arrival_time"].ToString(),
-                    Margin = new Thickness(0, 0, 142, 16),
+                    Margin = new Thickness(0, 10, 142, 16),
                     Width = 150,
                     TextAlignment = TextAlignment.Center
                 };
@@ -342,7 +426,7 @@ namespace FutaBuss.View
                 TextBlock tripType = new TextBlock
                 {
                     Text = tripTypeText,
-                    Margin = new Thickness(139, -1, 196, 1),
+                    Margin = new Thickness(139, 10, 196, 1),
                     Width = 100,
                     TextAlignment = TextAlignment.Center
                 };
@@ -363,7 +447,7 @@ namespace FutaBuss.View
                 TextBlock seatCount = new TextBlock
                 {
                     Text = totalEmptySeatsText,
-                    Margin = new Thickness(242, 0, -1, 16),
+                    Margin = new Thickness(242, 10, -1, 16),
                     Width = 150,
                     TextAlignment = TextAlignment.Right
                 };
