@@ -34,5 +34,15 @@ namespace FutaBuss.DataAccess
 
             return await collection.Find(filter).ToListAsync();
         }
+
+        public async Task<List<BsonDocument>> SearchRoundTripsAsync(string departure, string destination, string departureDate, int ticketCount)
+        {
+            var collection = _database.GetCollection<BsonDocument>("trips");
+            var filter = Builders<BsonDocument>.Filter.Eq("departure_province_code", departure)
+                          & Builders<BsonDocument>.Filter.Eq("destination_province_code", destination)
+                          & Builders<BsonDocument>.Filter.Eq("departure_date", departureDate);
+
+            return await collection.Find(filter).ToListAsync();
+        }
     }
 }
