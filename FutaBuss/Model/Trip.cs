@@ -36,7 +36,7 @@ namespace FutaBuss.Model
         [BsonElement("expected_arrival_time")]
         public TimeSpan ExpectedArrivalTime { get; set; }
 
-        [BsonElement("policíes")]
+        [BsonElement("policies")]
         public List<string> Policies { get; set; }
 
         [BsonElement("other_info")]
@@ -51,7 +51,5 @@ namespace FutaBuss.Model
         [BsonElement("arrival_date")]
         public DateTime ArrivalDate { get; set; }
 
-        [BsonElement("policies")]
-        public List<string> Policies1 { get; set; }
     }
 }
