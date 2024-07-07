@@ -24,6 +24,7 @@ namespace FutaBuss.View
             InitializeComponent();
             futaPayRadioButton.IsChecked = true;
             StartCountdown();
+            
         }
 
 
@@ -58,13 +59,17 @@ namespace FutaBuss.View
             if (countdownSeconds == 0)
             {
                 timer.Stop();
-                MessageBox.Show("Countdown finished!");
+                MessageBox.Show("Countdown finished!. Return Home Page");
             }
         }
 
 
         public void GenerateQRCode(string data)
         {
+
+            string[] parts = data.Split('-');
+            string lastPart = parts[parts.Length - 1];
+
             QrCodeEncodingOptions options = new()
             {
                 DisableECI = true,
@@ -80,7 +85,7 @@ namespace FutaBuss.View
                 Options = options
             };
 
-            string filePath = Path.Combine("..\\..\\..", "Images", "qrcode.png");
+            string filePath = Path.Combine("..\\..\\..", "Images", $"{lastPart}qrcode.png");
 
             Bitmap qrCodeBitmap = writer.Write(data);
             qrCodeBitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
@@ -92,7 +97,10 @@ namespace FutaBuss.View
         {
             GenerateQRCode(data);
 
-            string imagePath = Path.Combine("..\\..\\..", "Images", "qrcode.png");
+            string[] parts = data.Split('-');
+            string lastPart = parts[parts.Length - 1];
+
+            string imagePath = Path.Combine("..\\..\\..", "Images", $"{lastPart}qrcode.png");
 
             // Kiểm tra xem tệp có tồn tại không trước khi thiết lập Source
             if (File.Exists(imagePath))
@@ -153,9 +161,7 @@ namespace FutaBuss.View
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             RadioButton checkedRadioButton = sender as RadioButton;
-
-
-            string data = "Your QR Code Data"; // Replace with your actual data
+            string data = fullName.Text + '-' + phoneNumber.Text + '-' + email.Text + '-' + Path.GetFileNameWithoutExtension(checkedRadioButton.Tag.ToString()); // Replace with your actual data
             UpdateQRCodeImage(data);
             UpdateQRCodeLogo(checkedRadioButton.Tag.ToString());
 
