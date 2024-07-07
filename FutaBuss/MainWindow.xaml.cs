@@ -26,7 +26,7 @@ namespace FutaBuss
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new FutaBuss.View.Booking());
+            MainFrame.Navigate(new FutaBuss.View.PaymentMethod());
         }
     }
 }
