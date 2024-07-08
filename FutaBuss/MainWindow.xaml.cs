@@ -26,7 +26,7 @@ namespace FutaBuss
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new FutaBuss.View.Booking());
+            MainFrame.Navigate(new FutaBuss.View.Booking("b86d8901d5c045f9b19a0a4939d46a25", "b86d8901d5c045f9b19a0a4939d46a25"));
         }
     }
 }

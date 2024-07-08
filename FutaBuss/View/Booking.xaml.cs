@@ -33,13 +33,11 @@ namespace FutaBuss.View
         string seatText = string.Empty;
         string returnSeatText = string.Empty;
         bool isRoundTrip = false;
-        public Booking()
+        public Booking(string tripId, string? returnTripId = null)
         {
             InitializeComponent();
             InitializeDatabaseConnections();
-
-
-            InitializeAsync();
+            InitializeAsync(tripId, returnTripId);
 
         }
 
@@ -76,12 +74,12 @@ namespace FutaBuss.View
             }
         }
 
-        private async void InitializeAsync()
+        private async void InitializeAsync(string tripId, string? returnTripId = null)
         {
             try
             {
                 tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
-                await LoadTripDataAsync("b86d8901d5c045f9b19a0a4939d46a25", "b86d8901d5c045f9b19a0a4939d46a25");
+                await LoadTripDataAsync(tripId, returnTripId);
             }
             catch (Exception ex)
             {
