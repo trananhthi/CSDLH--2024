@@ -1,6 +1,6 @@
 ﻿using Cassandra;
+using FutaBuss.Model;
 using System.IO;
-using System.Windows;
 
 namespace FutaBuss.DataAccess
 {
@@ -42,6 +42,35 @@ namespace FutaBuss.DataAccess
         public ISession GetSession()
         {
             return _session;
+        }
+
+        public async Task AddBookingAsync(Booking booking, List<string> seatIdStrings)
+        {
+            // Chuyển đổi danh sách chuỗi GUID thành danh sách Guid
+            var seatIds = seatIdStrings.ConvertAll(Guid.Parse);
+
+            // Lưu vào bảng Booking
+            var insertBookingQuery = "INSERT INTO Booking (id, user_id, trip_id, created_at) VALUES (?, ?, ?, ?)";
+            var preparedStatement = await _session.PrepareAsync(insertBookingQuery);
+            var boundStatement = preparedStatement.Bind(booking.Id, booking.UserId, booking.TripId, booking.CreatedAt);
+            await _session.ExecuteAsync(boundStatement);
+
+            // Lưu vào bảng BookingSeat
+            var insertBookingSeatQuery = "INSERT INTO BookingSeat (id, seat_id, booking_id) VALUES (?, ?, ?)";
+            var preparedStatementSeat = await _session.PrepareAsync(insertBookingSeatQuery);
+
+            foreach (var seatId in seatIds)
+            {
+                var bookingSeat = new BookingSeat
+                {
+                    Id = Guid.NewGuid(),
+                    SeatId = seatId,
+                    BookingId = booking.Id
+                };
+
+                var boundStatementSeat = preparedStatementSeat.Bind(bookingSeat.Id, bookingSeat.SeatId, bookingSeat.BookingId);
+                await _session.ExecuteAsync(boundStatementSeat);
+            }
         }
     }
 }

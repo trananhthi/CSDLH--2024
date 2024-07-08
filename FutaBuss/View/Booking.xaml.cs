@@ -23,25 +23,27 @@ namespace FutaBuss.View
         private IMongoCollection<Trip> tripsCollection;
         private Trip trip;
         private Trip returnTrip;
-        List<string> selectedSeatIds = new List<string>();
-        int seatCount = 0;
+        List<string> departureSeatIds = new List<string>();
+        List<string> returnSeatIds = new List<string>();
+        int departureSeatCount = 0;
         int returnSeatCount = 0;
         int departureSeatPrice = 0;
         int returnSeatPrice = 0;
         int paymentFee = 0;
         string seatText = string.Empty;
         string returnSeatText = string.Empty;
+        bool isRoundTrip = false;
         public Booking()
         {
             InitializeComponent();
             InitializeDatabaseConnections();
 
-            tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
 
-            LoadTripData("0a8804db96c34be69f3dd8e10515d170", "1df7695e3bf3415fb9b29c903fbe438a");
+            InitializeAsync();
+
         }
 
-        
+
 
         private void InitializeDatabaseConnections()
         {
@@ -59,7 +61,7 @@ namespace FutaBuss.View
                 _postgreSQLConnection = PostgreSQLConnection.Instance;
                 _cassandraDBConnection = CassandraDBConnection.Instance;
 
-                
+
 
 
 
@@ -74,6 +76,18 @@ namespace FutaBuss.View
             }
         }
 
+        private async void InitializeAsync()
+        {
+            try
+            {
+                tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
+                await LoadTripDataAsync("b86d8901d5c045f9b19a0a4939d46a25", "b86d8901d5c045f9b19a0a4939d46a25");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void SeatButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -85,7 +99,7 @@ namespace FutaBuss.View
                     ImageBrush newBrush = new ImageBrush();
                     if (brush.ImageSource.ToString().Contains("seat_active.png"))
                     {
-                        if (seatCount > 4)
+                        if (departureSeatCount > 4)
                         {
                             MessageBox.Show("Đã chọn đủ số ghế");
                             return;
@@ -97,8 +111,8 @@ namespace FutaBuss.View
                             seatText += ",";
                         }
                         seatText += button.Content.ToString();
-                        selectedSeatIds.Add((string)button.Tag);
-                        seatCount++;
+                        departureSeatIds.Add((string)button.Tag);
+                        departureSeatCount++;
 
                     }
                     else if (brush.ImageSource.ToString().Contains("seat_selecting.png"))
@@ -112,10 +126,14 @@ namespace FutaBuss.View
                             seats.Remove(seatToRemove);
                             seatText = string.Join(",", seats);
                         }
-                        selectedSeatIds.Remove((string)button.Tag);
-                        seatCount--;
+                        departureSeatIds.Remove((string)button.Tag);
+                        departureSeatCount--;
                     }
-                    SeatCountTextBlock.Text = $"{seatCount} Ghế";
+                    else
+                    {
+                        return;
+                    }
+                    SeatCountTextBlock.Text = $"{departureSeatCount} Ghế";
                     TotalDeparturePriceTextBlock.Text = $"{departureSeatPrice}đ";
                     SeatTextBlock.Text = seatText;
                     DepartureSeatPriceTextBlock.Text = $"{departureSeatPrice}đ";
@@ -149,7 +167,7 @@ namespace FutaBuss.View
                             returnSeatText += ",";
                         }
                         returnSeatText += button.Content.ToString();
-                        selectedSeatIds.Add((string)button.Tag);
+                        returnSeatIds.Add((string)button.Tag);
                         returnSeatCount++;
 
                     }
@@ -164,8 +182,12 @@ namespace FutaBuss.View
                             seats.Remove(seatToRemove);
                             returnSeatText = string.Join(",", seats);
                         }
-                        selectedSeatIds.Remove((string)button.Tag);
+                        returnSeatIds.Remove((string)button.Tag);
                         returnSeatCount--;
+                    }
+                    else
+                    {
+                        return;
                     }
                     ReturnSeatCountTextBlock.Text = $"{returnSeatCount} Ghế";
                     ReturnSeatPriceTextBlock.Text = $"{returnSeatPrice}đ";
@@ -178,7 +200,7 @@ namespace FutaBuss.View
             }
         }
 
-        private void LoadTripData(string tripId, string? returnTripId = null)
+        private async Task LoadTripDataAsync(string tripId, string? returnTripId = null)
         {
             trip = tripsCollection.Find<Trip>(trip => trip.TripId == tripId).FirstOrDefault();
 
@@ -187,7 +209,7 @@ namespace FutaBuss.View
                 var departureProvince = _redisConnection.GetString($"province:{trip.DepartureProvinceCode}:name");
                 if (departureProvince == null)
                 {
-                    departureProvince = _postgreSQLConnection.GetProvinceByCode(trip.DepartureProvinceCode)?.Name;
+                    departureProvince = (await _postgreSQLConnection.GetProvinceByCodeAsync(trip.DepartureProvinceCode))?.Name;
                     if (departureProvince != null)
                     {
                         _redisConnection.SetString($"province:{trip.DepartureProvinceCode}:name", departureProvince);
@@ -197,7 +219,7 @@ namespace FutaBuss.View
                 var destinationProvince = _redisConnection.GetString($"province:{trip.DestinationProvinceCode}:name");
                 if (destinationProvince == null)
                 {
-                    destinationProvince = _postgreSQLConnection.GetProvinceByCode(trip.DestinationProvinceCode)?.Name;
+                    destinationProvince = (await _postgreSQLConnection.GetProvinceByCodeAsync(trip.DestinationProvinceCode))?.Name;
                     if (destinationProvince != null)
                     {
                         _redisConnection.SetString($"province:{trip.DestinationProvinceCode}:name", destinationProvince);
@@ -205,6 +227,7 @@ namespace FutaBuss.View
                 }
                 if (returnTripId != null)
                 {
+                    isRoundTrip = true;
                     ReturnTab.Visibility = Visibility.Visible;
                     returnTrip = tripsCollection.Find<Trip>(trip => trip.TripId == returnTripId).FirstOrDefault();
                     ReturnSeatPriceLabelTextBlock.Visibility = Visibility.Visible;
@@ -220,7 +243,7 @@ namespace FutaBuss.View
                 // Binding thông tin chuyến đi
                 RouteTextBlock.Text = $"{departureProvince} ➜ {destinationProvince}";
                 DepartureTimeTextBlock.Text = trip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
-                SeatCountTextBlock.Text = $"{seatCount} Ghế";
+                SeatCountTextBlock.Text = $"{departureSeatCount} Ghế";
                 TotalDeparturePriceTextBlock.Text = $"{departureSeatPrice}đ";
                 DepartureSeatPriceTextBlock.Text = $"{departureSeatPrice}đ";
                 PaymentFeeTextBlock.Text = $"{paymentFee}đ";
@@ -250,22 +273,23 @@ namespace FutaBuss.View
                     DepartureSeatGridTop.Rows = floor.NumRows;
                     DepartureSeatGridTop.Columns = floor.NumCols;
                 }
-                foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == floor.Ordinal).Seats)
+                foreach (var seat in seatConfig.Floors.FirstOrDefault(f => f.Ordinal == floor.Ordinal).Seats.Take(floor.NumRows * floor.NumCols))
                 {
                     Button seatButton = new Button();
                     seatButton.Tag = seat.SeatId;
                     seatButton.Content = seat.Alias;
+                    seatButton.FontSize = 11.5;
                     seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
                     seatButton.Margin = new Thickness(5);
                     seatButton.Click += SeatButton_Click;
                     ImageBrush brush = new ImageBrush();
-                    if (seat.Status == "empty")
+                    if (_redisConnection.KeyExistsPattern($"booking:*:seat:{seat.SeatId}") || seat.IsSold == true)
                     {
-                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
+                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
                     }
                     else
                     {
-                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
+                        brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
                     }
                     seatButton.Background = brush;
                     if (floor.Ordinal == 1)
@@ -286,30 +310,32 @@ namespace FutaBuss.View
                 {
                     if (floor.Ordinal == 1)
                     {
-                        DepartureSeatGridBot.Rows = floor.NumRows;
-                        DepartureSeatGridBot.Columns = floor.NumCols;
+                        ReturnSeatGridBot.Rows = floor.NumRows;
+                        ReturnSeatGridBot.Columns = floor.NumCols;
                     }
                     else if (floor.Ordinal == 2)
                     {
-                        DepartureSeatGridTop.Rows = floor.NumRows;
-                        DepartureSeatGridTop.Columns = floor.NumCols;
+                        ReturnSeatGridTop.Rows = floor.NumRows;
+                        ReturnSeatGridTop.Columns = floor.NumCols;
                     }
-                    foreach (var seat in returnSeatConfig.Floors.FirstOrDefault(f => f.Ordinal == floor.Ordinal).Seats)
+                    foreach (var seat in returnSeatConfig.Floors.FirstOrDefault(f => f.Ordinal == floor.Ordinal).Seats.Take(floor.NumRows * floor.NumCols))
                     {
+
                         Button seatButton = new Button();
                         seatButton.Tag = seat.SeatId;
                         seatButton.Content = seat.Alias;
+                        seatButton.FontSize = 11.5;
                         seatButton.Style = (Style)FindResource("NoHoverButtonStyle");
                         seatButton.Margin = new Thickness(5);
                         seatButton.Click += ReturnSeatButton_Click;
                         ImageBrush brush = new ImageBrush();
-                        if (seat.Status == "empty")
+                        if (_redisConnection.KeyExistsPattern($"booking:*:seat:{seat.SeatId}") || seat.IsSold == true)
                         {
-                            brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
+                            brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
                         }
                         else
                         {
-                            brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_disabled.png"));
+                            brush.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Images/seat_active.png"));
                         }
                         seatButton.Background = brush;
                         if (floor.Ordinal == 1)
@@ -325,11 +351,28 @@ namespace FutaBuss.View
             }
         }
 
-        private void btnPayment_Click(object sender, RoutedEventArgs e)
+        private async void btnPayment_Click(object sender, RoutedEventArgs e)
         {
+            if (isRoundTrip)
+            {
+                if (returnSeatCount <= 0)
+                {
+                    MessageBox.Show("Bạn chưa chọn ghế chuyến về. Vui lòng chọn ghế! ", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+            if (departureSeatCount <= 0)
+            {
+                string message = isRoundTrip ? "Bạn chưa chọn ghế chuyến đi. Vui lòng chọn ghế! " : "Bạn chưa chọn ghế. Vui lòng chọn ghế! ";
+
+                MessageBox.Show(message, "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (!IsValidName(TxtName.Text))
             {
                 MessageBox.Show("Họ và tên không hợp lệ. Vui lòng nhập lại.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TxtName.Focus();
                 return;
             }
 
@@ -337,6 +380,7 @@ namespace FutaBuss.View
             if (!IsValidPhoneNumber(TxtPhoneNumber.Text))
             {
                 MessageBox.Show("Số điện thoại không hợp lệ. Vui lòng nhập lại.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TxtPhoneNumber.Focus();
                 return;
             }
 
@@ -344,6 +388,7 @@ namespace FutaBuss.View
             if (!IsValidEmail(TxtEmail.Text))
             {
                 MessageBox.Show("Email không hợp lệ. Vui lòng nhập lại.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                TxtEmail.Focus();
                 return;
             }
             if (!chkAccept.IsChecked ?? false)
@@ -351,29 +396,52 @@ namespace FutaBuss.View
                 MessageBox.Show("Vui lòng chấp nhận điều khoản trước khi đăng ký.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            foreach (var seatId in departureSeatIds.Concat(returnSeatIds))
+            {
+                if (_redisConnection.KeyExistsPattern($"booking:*:seat:{seatId}"))
+                {
+                    MessageBox.Show("Ghế này đã được đặt. Vui lòng chọn ghế khác!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
             User user = new User()
             {
+                Id = Guid.NewGuid(),
                 Email = TxtEmail.Text,
                 FullName = TxtName.Text,
                 PhoneNumber = TxtPhoneNumber.Text,
             };
-            int? userId = _postgreSQLConnection.AddNewUser(user);
-            if (userId == null)
+
+            await _postgreSQLConnection.AddNewUserAsync(user);
+            var createdAt = DateTime.UtcNow;
+            var deapartureBooking = new FutaBuss.Model.Booking()
             {
-                MessageBox.Show("Có lỗi xảy ra trong hệ thống", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                TripId = Guid.Parse(trip.TripId),
+                CreatedAt = createdAt
+            };
+
+            _redisConnection.CacheBooking(deapartureBooking.Id, user.Id, departureSeatIds);
+            await _cassandraDBConnection.AddBookingAsync(deapartureBooking, departureSeatIds);
+            if (isRoundTrip)
+            {
+                var returnBooking = new FutaBuss.Model.Booking()
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    TripId = Guid.Parse(returnTrip.TripId),
+                    CreatedAt = createdAt
+                };
+                _redisConnection.CacheBooking(returnBooking.Id, user.Id, returnSeatIds);
+                await _cassandraDBConnection.AddBookingAsync(returnBooking, returnSeatIds);
             }
-            Guid booking_id = Guid.NewGuid();
-            _redisConnection.CacheBooking(booking_id, userId, selectedSeatIds);
-            //this.Hide();
-            //var window = new MainWindow(selectedSeatIds);
-            //window.Owner = this;
-            //window.ShowDialog();
+            this.NavigationService.Navigate(new PaymentMethod());
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            //this.Close();
+            this.NavigationService.Navigate(new SearchTrips());
         }
 
         private void TxtName_LostFocus(object sender, RoutedEventArgs e)
@@ -427,6 +495,6 @@ namespace FutaBuss.View
             }
         }
 
-        
+
     }
 }

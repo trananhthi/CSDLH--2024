@@ -156,7 +156,7 @@ namespace FutaBuss.DataAccess
             }
         }
 
-        public void CacheBooking(Guid id, int? userId, List<string> seatIds)
+        public void CacheBooking(Guid id, Guid userId, List<string> seatIds)
         {
             var bookingData = new Dictionary<string, string>();
 
@@ -172,11 +172,19 @@ namespace FutaBuss.DataAccess
             }
 
             var expiry = TimeSpan.FromMinutes(15);
+            var expiryTime = DateTime.UtcNow.Add(expiry);
 
+            var batch = _db.CreateBatch();
             foreach (var item in bookingData)
             {
-                _db.StringSet(item.Key, item.Value, expiry);
+                batch.StringSetAsync(item.Key, item.Value);
+                batch.KeyExpireAsync(item.Key, expiryTime);
             }
+
+            batch.StringSetAsync($"booking:{id}:wait_to_pay", "OK");
+            batch.KeyExpireAsync($"booking:{id}:wait_to_pay", expiryTime);
+
+            batch.Execute();
         }
 
         public List<Province> GetAllProvinces()
@@ -197,6 +205,19 @@ namespace FutaBuss.DataAccess
             provinces = provinces.OrderBy(p => p.Code).ToList();
 
             return provinces;
+        }
+
+        public bool KeyExistsPattern(string pattern)
+        {
+            var keys = _redis.GetServer(_redis.GetEndPoints()[0]).Keys(pattern: pattern);
+            foreach (var key in keys)
+            {
+                if (_db.KeyExists(key))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

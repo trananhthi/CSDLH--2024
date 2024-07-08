@@ -13,7 +13,7 @@ namespace FutaBuss.Model
         [BsonElement("position")]
         public List<int> Position { get; set; }
 
-        [BsonElement("status")]
-        public string Status { get; set; }
+        [BsonElement("is_sold")]
+        public bool? IsSold { get; set; }
     }
 }

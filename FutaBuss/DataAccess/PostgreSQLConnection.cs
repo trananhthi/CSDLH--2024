@@ -126,7 +126,6 @@
 using FutaBuss.Model;
 using Npgsql;
 
-
 namespace FutaBuss.DataAccess
 {
     public class PostgreSQLConnection
@@ -145,11 +144,11 @@ namespace FutaBuss.DataAccess
 
         public static PostgreSQLConnection Instance => _instance.Value;
 
-        public void OpenConnection()
+        public async Task OpenConnectionAsync()
         {
             try
             {
-                _connection.Open();
+                await _connection.OpenAsync();
             }
             catch (Exception ex)
             {
@@ -157,11 +156,11 @@ namespace FutaBuss.DataAccess
             }
         }
 
-        public void CloseConnection()
+        public async Task CloseConnectionAsync()
         {
             try
             {
-                _connection.Close();
+                await _connection.CloseAsync();
             }
             catch (Exception ex)
             {
@@ -169,22 +168,23 @@ namespace FutaBuss.DataAccess
             }
         }
 
-        public List<Province> GetProvinces()
+        public async Task<List<Province>> GetProvincesAsync()
         {
             var provinces = new List<Province>();
 
             try
             {
-                OpenConnection();
-                string query = "SELECT code, name FROM provinces";
-                using var command = new NpgsqlCommand(query, _connection);
-                using var reader = command.ExecuteReader();
+                await OpenConnectionAsync();
+                await using (var command = new NpgsqlCommand("SELECT code, name FROM provinces", _connection))
+                await using (var reader = await command.ExecuteReaderAsync())
 
-                while (reader.Read())
                 {
-                    string code = reader.GetString(0);
-                    string name = reader.GetString(1);
-                    provinces.Add(new Province(code, name));
+                    while (await reader.ReadAsync())
+                    {
+                        string code = reader.GetString(0);
+                        string name = reader.GetString(1);
+                        provinces.Add(new Province(code, name));
+                    }
                 }
             }
             catch (Exception ex)
@@ -193,30 +193,30 @@ namespace FutaBuss.DataAccess
             }
             finally
             {
-                CloseConnection();
+                await CloseConnectionAsync();
             }
 
             return provinces;
         }
 
-        public Province? GetProvinceByCode(string code)
+        public async Task<Province?> GetProvinceByCodeAsync(string code)
         {
             try
             {
-                OpenConnection();
-                string query = "SELECT code, name FROM provinces WHERE code = @code";
-                using var command = new NpgsqlCommand(query, _connection);
-                command.Parameters.AddWithValue("@code", code);
-                using var reader = command.ExecuteReader();
-
-                if (reader.Read())
+                await OpenConnectionAsync();
+                await using (var command = new NpgsqlCommand("SELECT code, name FROM provinces WHERE code = @code", _connection))
                 {
-                    string name = reader.GetString(1);
-                    return new Province(code, name);
-                }
-                else
-                {
-                    return null;
+                    command.Parameters.AddWithValue("@code", code);
+                    using var reader = command.ExecuteReader();
+                    if (await reader.ReadAsync())
+                    {
+                        string name = reader.GetString(1);
+                        return new Province(code, name);
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
             catch (Exception ex)
@@ -225,22 +225,24 @@ namespace FutaBuss.DataAccess
             }
             finally
             {
-                CloseConnection();
+                await CloseConnectionAsync();
             }
         }
 
-        public int? AddNewUser(User user)
+        public async Task AddNewUserAsync(User user)
         {
             try
             {
-                OpenConnection();
-                string query = "INSERT INTO users (fullname, phone, email) VALUES (@fullname, @phone, @email) returning id";
-                using var command = new NpgsqlCommand(query, _connection);
-                command.Parameters.AddWithValue("@fullname", user.FullName);
-                command.Parameters.AddWithValue("@phone", user.PhoneNumber);
-                command.Parameters.AddWithValue("@email", user.Email);
-                int? result = (int?)command.ExecuteScalar();
-                return result;
+                await OpenConnectionAsync();
+                await using (var command = new NpgsqlCommand("INSERT INTO users (id, fullname, phone, email) VALUES (@id ,@fullname, @phone, @email)", _connection))
+                {
+                    command.Parameters.AddWithValue("@id", user.Id);
+                    command.Parameters.AddWithValue("@fullname", user.FullName);
+                    command.Parameters.AddWithValue("@phone", user.PhoneNumber);
+                    command.Parameters.AddWithValue("@email", user.Email);
+                    await command.ExecuteNonQueryAsync();
+                }
+
             }
             catch (Exception ex)
             {
@@ -248,7 +250,7 @@ namespace FutaBuss.DataAccess
             }
             finally
             {
-                CloseConnection();
+                await CloseConnectionAsync();
             }
         }
     }

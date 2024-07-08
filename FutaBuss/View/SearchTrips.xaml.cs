@@ -31,7 +31,7 @@ namespace FutaBuss.View
 
             tripsCollection = _mongoDBConnection.GetCollection<Trip>("trips");
 
-            CacheProvince();
+            CacheProvinceAsync();
             LoadProvinces();
         }
 
@@ -76,10 +76,10 @@ namespace FutaBuss.View
             DestinationComboBox.SelectedValue = tempDeparture;
         }
 
-        private void CacheProvince()
+        private async Task CacheProvinceAsync()
         {
             var listProvince = new List<Province>();
-            listProvince = _postgreSQLConnection.GetProvinces();
+            listProvince = await _postgreSQLConnection.GetProvincesAsync();
             foreach (var province in listProvince)
             {
                 var name = _redisConnection.GetString($"province:{province.Code}:name");
