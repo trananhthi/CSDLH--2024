@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using FutaBuss.Model;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 
@@ -34,22 +35,22 @@ namespace FutaBuss.DataAccess
             return _database.GetCollection<T>(collectionName);
         }
 
-        public async Task<List<BsonDocument>> SearchTripsAsync(string departure, string destination, string departureDate, int ticketCount)
+        public async Task<List<Trip>> SearchTripsAsync(string departure, string destination, string departureDate, int ticketCount)
         {
-            var collection = _database.GetCollection<BsonDocument>("trips");
-            var filter = Builders<BsonDocument>.Filter.Eq("departure_province_code", departure)
-                          & Builders<BsonDocument>.Filter.Eq("destination_province_code", destination)
-                          & Builders<BsonDocument>.Filter.Eq("departure_date", departureDate);
+            var collection = _database.GetCollection<Trip>("trips");
+            var filter = Builders<Trip>.Filter.Eq("departure_province_code", departure)
+                          & Builders<Trip>.Filter.Eq("destination_province_code", destination)
+                          & Builders<Trip>.Filter.Eq("departure_date", departureDate);
 
             return await collection.Find(filter).ToListAsync();
         }
 
-        public async Task<List<BsonDocument>> SearchRoundTripsAsync(string departure, string destination, string departureDate, int ticketCount)
+        public async Task<List<Trip>> SearchRoundTripsAsync(string departure, string destination, string departureDate, int ticketCount)
         {
-            var collection = _database.GetCollection<BsonDocument>("trips");
-            var filter = Builders<BsonDocument>.Filter.Eq("departure_province_code", departure)
-                          & Builders<BsonDocument>.Filter.Eq("destination_province_code", destination)
-                          & Builders<BsonDocument>.Filter.Eq("departure_date", departureDate);
+            var collection = _database.GetCollection<Trip>("trips");
+            var filter = Builders<Trip>.Filter.Eq("departure_province_code", departure)
+                          & Builders<Trip>.Filter.Eq("destination_province_code", destination)
+                          & Builders<Trip>.Filter.Eq("departure_date", departureDate);
 
             return await collection.Find(filter).ToListAsync();
         }

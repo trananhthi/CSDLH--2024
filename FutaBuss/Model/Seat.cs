@@ -15,5 +15,8 @@ namespace FutaBuss.Model
 
         [BsonElement("is_sold")]
         public bool? IsSold { get; set; }
+
+        [BsonElement("row_group")]
+        public string RowGroup { get; set; }
     }
 }
