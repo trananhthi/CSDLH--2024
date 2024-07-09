@@ -41,28 +41,14 @@ namespace FutaBuss.View
 
         }
 
-
-
         private void InitializeDatabaseConnections()
         {
             try
             {
-                // Kết nối MongoDB
-                //_mongoDBConnection = new MongoDBConnection("mongodb+srv://thuannt:J396QWpWuiGDZhOs@thuannt.yzjzr9s.mongodb.net/?appName=ThuanNT", "futabus");
-
-                //_redisConnection = new RedisConnection("redis-18667.c8.us-east-1-2.ec2.cloud.redislabs.com:18667", "default", "dVZCrABvG85l0L9JQI9izqn2SDvvTx82");
-
-                //_postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
-
                 _mongoDBConnection = MongoDBConnection.Instance;
                 _redisConnection = RedisConnection.Instance;
                 _postgreSQLConnection = PostgreSQLConnection.Instance;
                 _cassandraDBConnection = CassandraDBConnection.Instance;
-
-
-
-
-
             }
             catch (ApplicationException ex)
             {
@@ -200,7 +186,7 @@ namespace FutaBuss.View
 
         private async Task LoadTripDataAsync(string tripId, string? returnTripId = null)
         {
-            trip = tripsCollection.Find<Trip>(trip => trip.TripId == tripId).FirstOrDefault();
+            trip = tripsCollection.Find<Trip>(trip => trip.Id == tripId).FirstOrDefault();
 
             if (trip != null)
             {
@@ -227,10 +213,29 @@ namespace FutaBuss.View
                 {
                     isRoundTrip = true;
                     ReturnTab.Visibility = Visibility.Visible;
-                    returnTrip = tripsCollection.Find<Trip>(trip => trip.TripId == returnTripId).FirstOrDefault();
+                    returnTrip = tripsCollection.Find<Trip>(trip => trip.Id == returnTripId).FirstOrDefault();
                     ReturnSeatPriceLabelTextBlock.Visibility = Visibility.Visible;
                     ReturnSeatPriceTextBlock.Visibility = Visibility.Visible;
-                    ReturnRouteTextBlock.Text = $"{departureProvince} ➜ {destinationProvince}";
+                    var returnDepartureProvince = _redisConnection.GetString($"province:{returnTrip.DepartureProvinceCode}:name");
+                    if (returnDepartureProvince == null)
+                    {
+                        returnDepartureProvince = (await _postgreSQLConnection.GetProvinceByCodeAsync(returnTrip.DepartureProvinceCode))?.Name;
+                        if (returnDepartureProvince != null)
+                        {
+                            _redisConnection.SetString($"province:{trip.DepartureProvinceCode}:name", returnDepartureProvince);
+                        }
+
+                    }
+                    var returnDestinationProvince = _redisConnection.GetString($"province:{returnTrip.DestinationProvinceCode}:name");
+                    if (returnDestinationProvince == null)
+                    {
+                        returnDestinationProvince = (await _postgreSQLConnection.GetProvinceByCodeAsync(returnTrip.DestinationProvinceCode))?.Name;
+                        if (returnDestinationProvince != null)
+                        {
+                            _redisConnection.SetString($"province:{returnTrip.DestinationProvinceCode}:name", returnDestinationProvince);
+                        }
+                    }
+                    ReturnRouteTextBlock.Text = $"{returnDepartureProvince} ➜ {returnDestinationProvince}";
                     ReturnDepartureTimeTextBlock.Text = returnTrip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
                     ReturnSeatCountTextBlock.Text = $"{returnSeatCount} Ghế";
                     ReturnSeatPriceTextBlock.Text = $"{returnSeatPrice}đ";
@@ -256,7 +261,6 @@ namespace FutaBuss.View
 
         private void LoadSeatConfig(SeatConfig seatConfig, SeatConfig? returnSeatConfig = null)
         {
-            // Tầng dưới
             var floors = seatConfig.Floors;
 
             foreach (var floor in floors)
@@ -416,7 +420,7 @@ namespace FutaBuss.View
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
-                TripId = Guid.Parse(trip.TripId),
+                TripId = trip.Id,
                 CreatedAt = createdAt
             };
 
@@ -428,7 +432,7 @@ namespace FutaBuss.View
                 {
                     Id = Guid.NewGuid(),
                     UserId = user.Id,
-                    TripId = Guid.Parse(returnTrip.TripId),
+                    TripId = returnTrip.Id,
                     CreatedAt = createdAt
                 };
                 _redisConnection.CacheBooking(returnBooking.Id, user.Id, returnSeatIds);
@@ -492,7 +496,5 @@ namespace FutaBuss.View
                 return false;
             }
         }
-
-
     }
 }

@@ -1,13 +1,9 @@
 ﻿using FutaBuss.DataAccess;
 using FutaBuss.Model;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using FontAwesome.WPF;
-using System.Windows.Media.Imaging;
 
 namespace FutaBuss.View
 {
@@ -98,15 +94,6 @@ namespace FutaBuss.View
         {
             try
             {
-                // Kết nối MongoDB
-                //_mongoDBConnection = new MongoDBConnection("mongodb+srv://thuannt:J396QWpWuiGDZhOs@thuannt.yzjzr9s.mongodb.net/?appName=ThuanNT", "futabus");
-
-                //_redisConnection = new RedisConnection("redis-18667.c8.us-east-1-2.ec2.cloud.redislabs.com:18667", "default", "dVZCrABvG85l0L9JQI9izqn2SDvvTx82");
-
-                //_postgreSQLConnection = new PostgreSQLConnection("Host=dpg-cq12053v2p9s73cjijm0-a.singapore-postgres.render.com;Username=root;Password=vTwWs92lObTZrhI9IFcJGXJxZCdzeBas;Database=mds_postpresql");
-                //_postgreSQLConnection.OpenConnection();
-
-
                 _mongoDBConnection = MongoDBConnection.Instance;
                 _redisConnection = RedisConnection.Instance;
                 _postgreSQLConnection = PostgreSQLConnection.Instance;
@@ -164,8 +151,9 @@ namespace FutaBuss.View
                     _originalRoundTrips = filteredRoundTrips;
                     DisplayRoundTrips(filteredTrips, filteredRoundTrips);
                 }
-                else{
-                    DisplayTrips(filteredTrips); 
+                else
+                {
+                    DisplayTrips(filteredTrips);
                 }
             }
             catch (Exception ex)
@@ -188,20 +176,20 @@ namespace FutaBuss.View
             var isRoundTrip = RoundTrip.IsChecked;
 
             if (isRoundTrip == true)
-            { 
-                if(_departureTripid == null)
+            {
+                if (_departureTripid == null)
                 {
                     MessageBox.Show("Bạn chưa chọn chuyến đi. Vui lòng chọn chuyến đi! ", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                else if(_returnTripid == null)
+                else if (_returnTripid == null)
                 {
                     MessageBox.Show("Bạn chưa chọn chuyến về. Vui lòng chọn chuyến về! ", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
 
-             this.NavigationService.Navigate(new FutaBuss.View.Booking(_departureTripid, _returnTripid));
+            this.NavigationService.Navigate(new FutaBuss.View.Booking(_departureTripid, _returnTripid));
         }
 
         private void ClearFiltersButton_Click(object sender, RoutedEventArgs e)
@@ -262,19 +250,6 @@ namespace FutaBuss.View
                 }
             }
 
-            //var floors = trip["seat_config"]["floors"].AsBsonArray;
-            //foreach (var floor in floors)
-            //{
-            //    var seats = floor["seats"].AsBsonArray;
-            //    foreach (var seat in seats)
-            //    {
-            //        if (seat["status"].AsString == "empty")
-            //        {
-            //            emptySeatCount++;
-            //        }
-            //    }
-            //}
-
             return emptySeatCount;
         }
 
@@ -295,75 +270,6 @@ namespace FutaBuss.View
 
             Border buttonBorDer = FindName($"{boderButtonName}") as Border;
             buttonBorDer.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFA5400"));
-
-            // Dựa vào tên của button để xác định loại xe, hàng ghế, tầng và cập nhật trạng thái checked/unchecked
-            //switch (clickedButton.Name)
-            //{
-            //    case "SeatedBusButton":
-            //        SeatedBusButton.FontWeight = FontWeights.Bold;
-            //        SeatedBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        SleeperBusButton.FontWeight = FontWeights.Normal;
-            //        SleeperBusButton.BorderThickness = new Thickness(0);
-            //        LimousineButton.FontWeight = FontWeights.Normal;
-            //        LimousineButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "SleeperBusButton":
-            //        SleeperBusButton.FontWeight = FontWeights.Bold;
-            //        SleeperBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        SeatedBusButton.FontWeight = FontWeights.Normal;
-            //        SeatedBusButton.BorderThickness = new Thickness(0);
-            //        LimousineButton.FontWeight = FontWeights.Normal;
-            //        LimousineButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "LimousineButton":
-            //        LimousineButton.FontWeight = FontWeights.Bold;
-            //        LimousineButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        SeatedBusButton.FontWeight = FontWeights.Normal;
-            //        SeatedBusButton.BorderThickness = new Thickness(0);
-            //        SleeperBusButton.FontWeight = FontWeights.Normal;
-            //        SleeperBusButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "MiddleRowButton":
-            //        MiddleRowButton.FontWeight = FontWeights.Bold;
-            //        MiddleRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        FrontRowButton.FontWeight = FontWeights.Normal;
-            //        FrontRowButton.BorderThickness = new Thickness(0);
-            //        LastRowButton.FontWeight = FontWeights.Normal;
-            //        LastRowButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "FrontRowButton":
-            //        FrontRowButton.FontWeight = FontWeights.Bold;
-            //        FrontRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        MiddleRowButton.FontWeight = FontWeights.Normal;
-            //        MiddleRowButton.BorderThickness = new Thickness(0);
-            //        LastRowButton.FontWeight = FontWeights.Normal;
-            //        LastRowButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "LastRowButton":
-            //        LastRowButton.FontWeight = FontWeights.Bold;
-            //        LastRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        MiddleRowButton.FontWeight = FontWeights.Normal;
-            //        MiddleRowButton.BorderThickness = new Thickness(0);
-            //        FrontRowButton.FontWeight = FontWeights.Normal;
-            //        FrontRowButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "UpperFloorButton":
-            //        UpperFloorButton.FontWeight = FontWeights.Bold;
-            //        UpperFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        LowerFloorButton.FontWeight = FontWeights.Normal;
-            //        LowerFloorButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    case "LowerFloorButton":
-            //        LowerFloorButton.FontWeight = FontWeights.Bold;
-            //        LowerFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
-            //        UpperFloorButton.FontWeight = FontWeights.Normal;
-            //        UpperFloorButton.BorderThickness = new Thickness(0);
-            //        break;
-            //    default:
-            //        break;
-            //}
-
-
 
             // Gọi lại hàm ApplyFilters để áp dụng bộ lọc
             ApplyFilters();
@@ -424,51 +330,51 @@ namespace FutaBuss.View
             if (_originalTrips != null)
             {
                 foreach (var trip in _originalTrips)
-            {
-                // Parse departure time and date
-                DateTime departureDate = DateTime.Parse(trip.DepartureDate.ToString());
-                TimeSpan departureTime = TimeSpan.Parse(trip.DepartureTime.ToString());
-                DateTime departureDateTime = departureDate.Add(departureTime);
-
-                string tripType = trip.TripType.ToString();
-
-                // Time condition
-                bool timeCondition = (earlyMorning && departureDateTime.Hour >= 0 && departureDateTime.Hour < 6) ||
-                                     (morning && departureDateTime.Hour >= 6 && departureDateTime.Hour < 12) ||
-                                     (afternoon && departureDateTime.Hour >= 12 && departureDateTime.Hour < 18) ||
-                                     (evening && departureDateTime.Hour >= 18 && departureDateTime.Hour < 24);
-
-                // Type condition
-                bool typeCondition = (seatedBus && tripType == "seated_bus") ||
-                                     (sleeperBus && tripType == "sleeper_bus") ||
-                                     (limousine && tripType == "limousine");
-
-                // Row condition
-                bool rowCondition = false;
-                var floorsArray = trip.SeatConfig.Floors;
-                foreach (var floor in floorsArray)
                 {
-                    var seatsArray = floor.Seats;
-                    if ((middleRow && seatsArray.Any(seat => seat.RowGroup == "mid")) ||
-                        (frontRow && seatsArray.Any(seat => seat.RowGroup == "head")) ||
-                        (lastRow && seatsArray.Any(seat => seat.RowGroup == "tail")))
+                    // Parse departure time and date
+                    DateTime departureDate = DateTime.Parse(trip.DepartureDate.ToString());
+                    TimeSpan departureTime = TimeSpan.Parse(trip.DepartureTime.ToString());
+                    DateTime departureDateTime = departureDate.Add(departureTime);
+
+                    string tripType = trip.TripType.ToString();
+
+                    // Time condition
+                    bool timeCondition = (earlyMorning && departureDateTime.Hour >= 0 && departureDateTime.Hour < 6) ||
+                                         (morning && departureDateTime.Hour >= 6 && departureDateTime.Hour < 12) ||
+                                         (afternoon && departureDateTime.Hour >= 12 && departureDateTime.Hour < 18) ||
+                                         (evening && departureDateTime.Hour >= 18 && departureDateTime.Hour < 24);
+
+                    // Type condition
+                    bool typeCondition = (seatedBus && tripType == "seated_bus") ||
+                                         (sleeperBus && tripType == "sleeper_bus") ||
+                                         (limousine && tripType == "limousine");
+
+                    // Row condition
+                    bool rowCondition = false;
+                    var floorsArray = trip.SeatConfig.Floors;
+                    foreach (var floor in floorsArray)
                     {
-                        rowCondition = true;
-                        break;
+                        var seatsArray = floor.Seats;
+                        if ((middleRow && seatsArray.Any(seat => seat.RowGroup == "mid")) ||
+                            (frontRow && seatsArray.Any(seat => seat.RowGroup == "head")) ||
+                            (lastRow && seatsArray.Any(seat => seat.RowGroup == "tail")))
+                        {
+                            rowCondition = true;
+                            break;
+                        }
+                    }
+
+                    // Floor condition
+                    bool floorCondition = (upperFloor && floorsArray.Any(floor => floor.Ordinal == 1)) ||
+                                          (lowerFloor && floorsArray.Any(floor => floor.Ordinal == 2));
+
+                    // Kiểm tra tất cả các điều kiện
+                    if (timeCondition && typeCondition && rowCondition && floorCondition)
+                    {
+                        // Nếu tất cả điều kiện đều đúng, thêm chuyến xe vào FilteredTrips
+                        FilteredTrips.Add(trip);
                     }
                 }
-
-                // Floor condition
-                bool floorCondition = (upperFloor && floorsArray.Any(floor => floor.Ordinal == 1)) ||
-                                      (lowerFloor && floorsArray.Any(floor => floor.Ordinal == 2));
-
-                // Kiểm tra tất cả các điều kiện
-                if (timeCondition && typeCondition && rowCondition && floorCondition)
-                {
-                    // Nếu tất cả điều kiện đều đúng, thêm chuyến xe vào FilteredTrips
-                    FilteredTrips.Add(trip);
-                }
-            }
             }
             if (RoundTrip.IsChecked == true)
             {
@@ -522,8 +428,8 @@ namespace FutaBuss.View
                     }
                 }
 
-            // Hiển thị các chuyến xe đã lọc
-            
+                // Hiển thị các chuyến xe đã lọc
+
                 DisplayRoundTrips(FilteredTrips, FilteredRoundTrips);
                 return;
             }
@@ -756,7 +662,7 @@ namespace FutaBuss.View
 
             string departureDateString = departureDate.Value.ToString("dd/MM");
             string returnDateString = returnDate.Value.ToString("dd/MM");
-            string departureButtonContent =  $"Chuyến đi - {(departureDateString)}";
+            string departureButtonContent = $"Chuyến đi - {(departureDateString)}";
             string returnButtonContent = $"Chuyến về - {(returnDateString)}";
             StackPanel resultPanel = FindName("ResultPanel") as StackPanel;
             resultPanel.Children.Clear();
@@ -785,7 +691,7 @@ namespace FutaBuss.View
             Button departureButton = new Button
             {
                 Content = departureButtonContent,
-                Margin = new Thickness(5,5,0,10),
+                Margin = new Thickness(5, 5, 0, 10),
                 FontWeight = FontWeights.Bold, // Set default bold font weight
                 BorderThickness = new Thickness(0, 0, 0, 2), // Set default bottom border
                 Padding = new Thickness(10),
@@ -797,7 +703,7 @@ namespace FutaBuss.View
             Button returnButton = new Button
             {
                 Content = returnButtonContent,
-                Margin = new Thickness(0,5,5,10),
+                Margin = new Thickness(0, 5, 5, 10),
                 FontWeight = FontWeights.Bold, // Set default bold font weight
                 BorderThickness = new Thickness(0, 0, 0, 2), // Set default bottom border
                 Padding = new Thickness(10),
