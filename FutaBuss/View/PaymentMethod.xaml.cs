@@ -1,15 +1,13 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using ZXing.Common;
-using ZXing;
+﻿using FutaBuss.DataAccess;
 using System.Drawing;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using ZXing;
 using ZXing.QrCode;
 using ZXing.Windows.Compatibility;
-using System.IO;
-using System.Windows.Threading;
-using FutaBuss.DataAccess;
-using FutaBuss.Model;
 
 namespace FutaBuss.View
 {
@@ -21,7 +19,7 @@ namespace FutaBuss.View
         private DispatcherTimer timer;
         private int countdownSeconds = 100; // Thời gian đếm ngược, đơn vị là giây
         private FutaBuss.Model.Booking booking;
-        private FutaBuss.Model.User customer;
+        private FutaBuss.Model.Customer customer;
         private FutaBuss.Model.Trip trip;
 
         private MongoDBConnection _mongoDBConnection;
@@ -33,11 +31,11 @@ namespace FutaBuss.View
         {
             InitializeComponent();
             InitializeDatabaseConnections();
-           
+
             futaPayRadioButton.IsChecked = true;
             StartCountdown();
             InitializeAsync(bookingId, returnBookingId);
-           
+
 
         }
 
@@ -83,7 +81,7 @@ namespace FutaBuss.View
             }
         }
 
-        private async Task<FutaBuss.Model.User> GetCustomerAsync(Guid customerId)
+        private async Task<FutaBuss.Model.Customer> GetCustomerAsync(Guid customerId)
         {
             try
             {
@@ -112,14 +110,17 @@ namespace FutaBuss.View
             }
         }
 
-        private void LoadCustomerInfo (FutaBuss.Model.User customer)
+        private void LoadCustomerInfo(FutaBuss.Model.Customer customer)
         {
             fullName.Text = customer.FullName;
             email.Text = customer.Email;
             phoneNumber.Text = customer.PhoneNumber;
         }
 
-        private void LoadTripInfo (FutaBuss.Model.Trip trip)
+        private void LoadTripInfo(FutaBuss.Model.Trip trip)
+        {
+
+        }
 
 
         private void StartCountdown()
@@ -219,11 +220,11 @@ namespace FutaBuss.View
         private void UpdateQRCodeLogo(string fileName)
         {
 
-            if(fileName == "shopee.png" || fileName == "vietQR.png")
+            if (fileName == "shopee.png" || fileName == "vietQR.png")
             {
                 string imagePath = Path.Combine("..\\..\\..", "Images", fileName);
                 imgQRLogo.Visibility = Visibility.Visible;
-                svgQRLogo.Visibility= Visibility.Collapsed;
+                svgQRLogo.Visibility = Visibility.Collapsed;
 
                 // Kiểm tra xem tệp có tồn tại không trước khi thiết lập Source
                 if (File.Exists(imagePath))
@@ -243,7 +244,8 @@ namespace FutaBuss.View
                     throw new Exception($"File '{imagePath}' not found.");
                 }
             }
-            else {
+            else
+            {
                 imgQRLogo.Visibility = Visibility.Collapsed;
                 svgQRLogo.Visibility = Visibility.Visible;
                 svgQRLogo.Source = new Uri($"pack://application:,,,/Images/{fileName}");

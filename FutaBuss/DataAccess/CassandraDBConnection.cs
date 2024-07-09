@@ -122,25 +122,25 @@ namespace FutaBuss.DataAccess
             await Task.WhenAll(updateTasks).ConfigureAwait(false);
         }
 
-        public async Task<Booking> GetBookingByIdAsync(Guid bookingId)
-        {
-            var statement = new SimpleStatement("SELECT * FROM Booking WHERE id = ?", bookingId);
-            var bookingRowSet = await _session.ExecuteAsync(statement).ConfigureAwait(false);
-            var bookingRow = bookingRowSet.FirstOrDefault();
+        //public async Task<Booking> GetBookingByIdAsync(Guid bookingId)
+        //{
+        //    var statement = new SimpleStatement("SELECT * FROM Booking WHERE id = ?", bookingId);
+        //    var bookingRowSet = await _session.ExecuteAsync(statement).ConfigureAwait(false);
+        //    var bookingRow = bookingRowSet.FirstOrDefault();
 
-            if (bookingRow == null)
-            {
-                throw new Exception("Booking not found");
-            }
+        //    if (bookingRow == null)
+        //    {
+        //        throw new Exception("Booking not found");
+        //    }
 
-            return new Booking
-            {
-                Id = bookingRow.GetValue<Guid>("id"),
-                UserId = bookingRow.GetValue<Guid>("user_id"),
-                TripId = bookingRow.GetValue<string>("trip_id"),
-                CreatedAt = bookingRow.GetValue<DateTime>("created_at")
-            };
-        }
+        //    return new Booking
+        //    {
+        //        Id = bookingRow.GetValue<Guid>("id"),
+        //        UserId = bookingRow.GetValue<Guid>("user_id"),
+        //        TripId = bookingRow.GetValue<string>("trip_id"),
+        //        CreatedAt = bookingRow.GetValue<DateTime>("created_at")
+        //    };
+        //}
 
         public async Task<List<BookingSeat>> GetBookingSeatsByBookingIdAsync(Guid bookingId)
         {
@@ -193,7 +193,7 @@ namespace FutaBuss.DataAccess
         }
 
 
-        public async Task<User> GetCustomerByIdAsync(Guid customerId)
+        public async Task<Customer> GetCustomerByIdAsync(Guid customerId)
         {
             var selectQuery = "SELECT * FROM customer WHERE id = ?";
             var preparedStatement = await _session.PrepareAsync(selectQuery);
@@ -205,7 +205,7 @@ namespace FutaBuss.DataAccess
 
             if (row != null)
             {
-                var user = new User
+                var user = new Customer
                 {
                     Id = row.GetValue<Guid>("id"),
                     FullName = row.GetValue<string>("fullname"),
