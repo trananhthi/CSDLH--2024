@@ -1,6 +1,7 @@
 ﻿using FutaBuss.DataAccess;
 using FutaBuss.Model;
 using MongoDB.Driver;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -122,6 +123,9 @@ namespace FutaBuss.View
         private async void SearchTripsButton_Click(object sender, RoutedEventArgs e)
         {
             ClearFilters();
+            TextBlock noResultTextBlock = FindName("NoResultTextBlock") as TextBlock;
+            noResultTextBlock.Visibility = Visibility.Collapsed;
+     
             string departure = DepartureComboBox.SelectedValue as string;
             string destination = DestinationComboBox.SelectedValue as string;
             DateTime? departureDate = DepartureDatePicker.SelectedDate;
@@ -146,7 +150,7 @@ namespace FutaBuss.View
                 if (RoundTrip.IsChecked == true)
                 {
                     List<Trip> roundTrips = await _mongoDBConnection.SearchRoundTripsAsync(destination, departure, returnDateString);
-                    var filteredRoundTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+                    var filteredRoundTrips = roundTrips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
 
                     _originalRoundTrips = filteredRoundTrips;
                     DisplayRoundTrips(filteredTrips, filteredRoundTrips);
@@ -188,6 +192,8 @@ namespace FutaBuss.View
                     return;
                 }
             }
+
+            Debug.WriteLine($"{_departureTripid}, {_returnTripid}");
 
             this.NavigationService.Navigate(new FutaBuss.View.Booking(_departureTripid, _returnTripid));
         }
@@ -439,6 +445,14 @@ namespace FutaBuss.View
         private void DisplayTrips(List<Trip> trips)
         {
             StackPanel resultPanel = FindName("ResultPanel") as StackPanel;
+            TextBlock noResultTextBlock = FindName("NoResultTextBlock") as TextBlock;
+
+            if (trips.Count == 0)
+            {
+                noResultTextBlock.Visibility = Visibility.Visible;
+                return;
+            }
+
             resultPanel.Children.Clear();
             if (trips.Count > 0)
             {
@@ -631,21 +645,6 @@ namespace FutaBuss.View
                 resultPanel.Children.Add(tripBorder);
             }
         }
-
-        private void ChangeInfotrip(List<Trip> trips, TextBlock tripInfoTextBlock)
-        {
-            string departureProvinceCode = DepartureComboBox.SelectedValue as string;
-            string destinationProvinceCode = DestinationComboBox.SelectedValue as string;
-
-            _provinceDictionary.TryGetValue(departureProvinceCode, out string departureProvinceName);
-            _provinceDictionary.TryGetValue(destinationProvinceCode, out string destinationProvinceName);
-
-            string tripInfo = $"{(departureProvinceName ?? departureProvinceCode)} - {(destinationProvinceName ?? destinationProvinceCode)} ({trips.Count} chuyến)";
-
-            tripInfoTextBlock.Text = tripInfo.ToString();
-
-        }
-
         private void SetButtonActive(Button activeButton, Button inactiveButton)
         {
             activeButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFA5400"));
@@ -654,16 +653,28 @@ namespace FutaBuss.View
             inactiveButton.Foreground = Brushes.Black;
             inactiveButton.BorderBrush = null;
         }
+
         private void DisplayRoundTrips(List<Trip> departureTrips, List<Trip> returnTrips)
         {
             DateTime? departureDate = DepartureDatePicker.SelectedDate;
             DateTime? returnDate = ReturnDatePicker.SelectedDate;
+            TextBlock noResultTextBlock = FindName("NoResultTextBlock") as TextBlock;
 
+            if (departureTrips.Count == 0 && returnTrips.Count == 0)
+            {
+                noResultTextBlock.Visibility = Visibility.Visible;
+                return;
+            }
 
             string departureDateString = departureDate.Value.ToString("dd/MM");
             string returnDateString = returnDate.Value.ToString("dd/MM");
             string departureButtonContent = $"Chuyến đi - {(departureDateString)}";
             string returnButtonContent = $"Chuyến về - {(returnDateString)}";
+            string departureProvinceCode = departureTrips[0].DepartureProvinceCode.ToString();
+            string destinationProvinceCode = departureTrips[0].DestinationProvinceCode.ToString();
+
+            _provinceDictionary.TryGetValue(departureProvinceCode, out string departureProvinceName);
+            _provinceDictionary.TryGetValue(destinationProvinceCode, out string destinationProvinceName);
             StackPanel resultPanel = FindName("ResultPanel") as StackPanel;
             resultPanel.Children.Clear();
 
@@ -677,7 +688,7 @@ namespace FutaBuss.View
             };
 
             resultPanel.Children.Add(tripInfoTextBlock);
-            ChangeInfotrip(departureTrips, tripInfoTextBlock);
+            tripInfoTextBlock.Text = $"{(departureProvinceName ?? departureProvinceCode)} - {(destinationProvinceName ?? destinationProvinceCode)} ({departureTrips.Count} chuyến)";
 
             Grid gridContainer = new Grid();
             gridContainer.HorizontalAlignment = HorizontalAlignment.Stretch; // Đặt chiều rộng của grid là 100%
@@ -716,7 +727,7 @@ namespace FutaBuss.View
             departureButton.Click += (sender, e) =>
             {
                 ShowTrips(departureTrips, "Chuyến đi");
-                ChangeInfotrip(departureTrips, tripInfoTextBlock);
+                tripInfoTextBlock.Text = $"{(departureProvinceName ?? departureProvinceCode)} - {(destinationProvinceName ?? destinationProvinceCode)} ({departureTrips.Count} chuyến)";
                 // Reset all buttons to default style
                 SetButtonActive(departureButton, returnButton);
                 departureButton.Foreground = Brushes.White;
@@ -731,7 +742,7 @@ namespace FutaBuss.View
             returnButton.Click += (sender, e) =>
             {
                 ShowTrips(returnTrips, "Chuyến về");
-                ChangeInfotrip(returnTrips, tripInfoTextBlock);
+                tripInfoTextBlock.Text = $"{(departureProvinceName ?? departureProvinceCode)} - {(destinationProvinceName ?? destinationProvinceCode)} ({returnTrips.Count} chuyến)";
                 // Reset all buttons to default style
                 SetButtonActive(returnButton, departureButton);
                 departureButton.Foreground = Brushes.Black;
@@ -916,7 +927,9 @@ namespace FutaBuss.View
                     Foreground = Brushes.White,
                     Padding = new Thickness(5, 2, 5, 2)
                 };
-                selectButton.Click += (sender, e) => SelectTrip(trip, tripType.ToString());
+
+                Debug.WriteLine($"{trip.Id}, {tripType}");
+                selectButton.Click += (sender, e) => SelectTrip(trip, tripType);
 
                 Border buttonBorder = new Border
                 {
