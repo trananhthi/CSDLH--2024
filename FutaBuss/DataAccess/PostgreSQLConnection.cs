@@ -104,12 +104,12 @@ namespace FutaBuss.DataAccess
             }
         }
 
-        public async Task AddNewUserAsync(User user)
+        public async Task AddNewUserAsync(Customer user)
         {
             try
             {
                 await OpenConnectionAsync();
-                await using (var command = new NpgsqlCommand("INSERT INTO users (id, fullname, phone, email) VALUES (@id ,@fullname, @phone, @email)", _connection))
+                await using (var command = new NpgsqlCommand("INSERT INTO customers (id, fullname, phone, email) VALUES (@id ,@fullname, @phone, @email)", _connection))
                 {
                     command.Parameters.AddWithValue("@id", user.Id);
                     command.Parameters.AddWithValue("@fullname", user.FullName);

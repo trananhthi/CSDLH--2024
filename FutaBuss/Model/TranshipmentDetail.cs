@@ -6,7 +6,7 @@ namespace FutaBuss.Model
     public class TranshipmentDetail
     {
         [BsonElement("id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [BsonElement("location")]
         public string Location { get; set; }

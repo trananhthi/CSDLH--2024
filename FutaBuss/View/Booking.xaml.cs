@@ -1,6 +1,7 @@
 ﻿using FutaBuss.DataAccess;
 using FutaBuss.Model;
 using MongoDB.Driver;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,10 @@ namespace FutaBuss.View
         List<string> departureSeatIds = new List<string>();
         List<string> returnSeatIds = new List<string>();
         int departureSeatCount = 0;
+        Guid departurePickUpId;
+        Guid departureDropOffId;
+        Guid returnPickUpId;
+        Guid returnDropOffId;
         int returnSeatCount = 0;
         int departureSeatPrice = 0;
         int returnSeatPrice = 0;
@@ -236,7 +241,7 @@ namespace FutaBuss.View
                         }
                     }
                     ReturnRouteTextBlock.Text = $"{returnDepartureProvince} ➜ {returnDestinationProvince}";
-                    ReturnDepartureTimeTextBlock.Text = returnTrip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
+                    ReturnDepartureTimeTextBlock.Text = $"{returnTrip.DepartureTime.ToString(@"hh\:mm")} {returnTrip.DepartureDate.ToString("dd/MM/yyyy")}";
                     ReturnSeatCountTextBlock.Text = $"{returnSeatCount} Ghế";
                     ReturnSeatPriceTextBlock.Text = $"{returnSeatPrice}đ";
                     TotalReturnPriceTextBlock.Text = $"{returnSeatPrice}đ";
@@ -245,7 +250,11 @@ namespace FutaBuss.View
                 }
                 // Binding thông tin chuyến đi
                 RouteTextBlock.Text = $"{departureProvince} ➜ {destinationProvince}";
-                DepartureTimeTextBlock.Text = trip.DepartureDate.ToString("HH:mm dd/MM/yyyy");
+                string departureTimeFormatted = trip.DepartureTime.ToString(@"hh\:mm");
+
+                // Định dạng DateTime thành chuỗi ngày
+                string departureDateFormatted = trip.DepartureDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DepartureTimeTextBlock.Text = $"{trip.DepartureTime.ToString(@"hh\:mm")} {trip.DepartureDate.ToString("dd/MM/yyyy")}";
                 SeatCountTextBlock.Text = $"{departureSeatCount} Ghế";
                 TotalDeparturePriceTextBlock.Text = $"{departureSeatPrice}đ";
                 DepartureSeatPriceTextBlock.Text = $"{departureSeatPrice}đ";
@@ -406,7 +415,7 @@ namespace FutaBuss.View
                     return;
                 }
             }
-            User user = new User()
+            Customer customer = new Customer()
             {
                 Id = Guid.NewGuid(),
                 Email = TxtEmail.Text,
@@ -414,28 +423,32 @@ namespace FutaBuss.View
                 PhoneNumber = TxtPhoneNumber.Text,
             };
 
-            await _postgreSQLConnection.AddNewUserAsync(user);
+            await _cassandraDBConnection.CreateCustomerAsync(customer);
             var createdAt = DateTime.UtcNow;
             var deapartureBooking = new FutaBuss.Model.Booking()
             {
                 Id = Guid.NewGuid(),
-                UserId = user.Id,
+                UserId = customer.Id,
                 TripId = trip.Id,
+                PickUpLocationId = departurePickUpId,
+                DropOffLocationId = departureDropOffId,
                 CreatedAt = createdAt
             };
 
-            _redisConnection.CacheBooking(deapartureBooking.Id, user.Id, departureSeatIds);
+            _redisConnection.CacheBooking(deapartureBooking.Id, customer.Id, departureSeatIds);
             await _cassandraDBConnection.AddBookingAsync(deapartureBooking, departureSeatIds);
             if (isRoundTrip)
             {
                 var returnBooking = new FutaBuss.Model.Booking()
                 {
                     Id = Guid.NewGuid(),
-                    UserId = user.Id,
+                    UserId = customer.Id,
                     TripId = returnTrip.Id,
+                    PickUpLocationId = returnPickUpId,
+                    DropOffLocationId = returnDropOffId,
                     CreatedAt = createdAt
                 };
-                _redisConnection.CacheBooking(returnBooking.Id, user.Id, returnSeatIds);
+                _redisConnection.CacheBooking(returnBooking.Id, customer.Id, returnSeatIds);
                 await _cassandraDBConnection.AddBookingAsync(returnBooking, returnSeatIds);
             }
             this.NavigationService.Navigate(new PaymentMethod());
@@ -475,7 +488,7 @@ namespace FutaBuss.View
 
         private bool IsValidName(string name)
         {
-            return !string.IsNullOrWhiteSpace(name) && name.Length > 1;
+            return !string.IsNullOrWhiteSpace(name) && name.Length > 0;
         }
 
         private bool IsValidPhoneNumber(string phoneNumber)
@@ -494,6 +507,47 @@ namespace FutaBuss.View
             catch
             {
                 return false;
+            }
+        }
+
+        public async Task UpdateBooking(Guid bookingId, Guid paymentId)
+        {
+            await _cassandraDBConnection.CreateTicketsAsync(bookingId, paymentId);
+        }
+
+        private void PickUpComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedPickUp = PickUpComboBox.SelectedItem as TranshipmentDetail;
+            if (selectedPickUp != null)
+            {
+                departurePickUpId = Guid.Parse(selectedPickUp.Id);
+            }
+        }
+
+        private void DropOffComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedDropOff = DropOffComboBox.SelectedItem as TranshipmentDetail;
+            if (selectedDropOff != null)
+            {
+                departureDropOffId = Guid.Parse(selectedDropOff.Id);
+            }
+        }
+
+        private void ReturnPickUpComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedPickUp = ReturnPickUpComboBox.SelectedItem as TranshipmentDetail;
+            if (selectedPickUp != null)
+            {
+                returnPickUpId = Guid.Parse(selectedPickUp.Id);
+            }
+        }
+
+        private void ReturnDropOffComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedDropOff = ReturnDropOffComboBox.SelectedItem as TranshipmentDetail;
+            if (selectedDropOff != null)
+            {
+                returnDropOffId = Guid.Parse(selectedDropOff.Id);
             }
         }
     }
