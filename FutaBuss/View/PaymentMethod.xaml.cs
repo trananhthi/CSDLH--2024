@@ -10,6 +10,7 @@ using System.IO;
 using System.Windows.Threading;
 using FutaBuss.DataAccess;
 using FutaBuss.Model;
+using static MongoDB.Driver.WriteConcern;
 
 namespace FutaBuss.View
 {
@@ -21,8 +22,9 @@ namespace FutaBuss.View
         private DispatcherTimer timer;
         private int countdownSeconds = 100; // Thời gian đếm ngược, đơn vị là giây
         private FutaBuss.Model.Booking booking;
-        private FutaBuss.Model.User customer;
+        private FutaBuss.Model.Customer customer;
         private FutaBuss.Model.Trip trip;
+        int totalPriceTrip = 0;
 
         private MongoDBConnection _mongoDBConnection;
         private RedisConnection _redisConnection;
@@ -43,11 +45,12 @@ namespace FutaBuss.View
 
         public async Task InitializeAsync(Guid bookingId, Guid? returnBookingId = null)
         {
-            // Gọi phương thức GetBookingAsync và đợi cho đến khi hoàn thành
-            booking = await GetBookingAsync(bookingId); // Thay Guid.NewGuid() bằng bookingId thích hợp
+            booking = await GetBookingAsync(bookingId); 
             customer = await GetCustomerAsync(booking.UserId);
             trip = await GetTripAsync(booking.TripId);
             LoadCustomerInfo(customer);
+            LoadTripInfo(trip);
+            LoadTotalPriceInfo();
         }
 
         private void InitializeDatabaseConnections()
@@ -83,7 +86,7 @@ namespace FutaBuss.View
             }
         }
 
-        private async Task<FutaBuss.Model.User> GetCustomerAsync(Guid customerId)
+        private async Task<FutaBuss.Model.Customer> GetCustomerAsync(Guid customerId)
         {
             try
             {
@@ -112,14 +115,102 @@ namespace FutaBuss.View
             }
         }
 
-        private void LoadCustomerInfo (FutaBuss.Model.User customer)
+        private async Task<string> GetProvinceName(string code)
+        {
+            try
+            {
+                return await _postgreSQLConnection.GetProvinceNameByCodeAsync(code);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+        private async Task<int> CountSeat(Guid bookingId)
+        {
+            try
+            {
+                return await _cassandraDBConnection.CountSeat(bookingId);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+
+        private async Task<List<BookingSeat>> GetAllBookingSeat(Guid bookingId)
+        {
+            try
+            {
+                return await _cassandraDBConnection.GetAllBookingSeats(bookingId);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+        private void LoadCustomerInfo (FutaBuss.Model.Customer customer)
         {
             fullName.Text = customer.FullName;
             email.Text = customer.Email;
             phoneNumber.Text = customer.PhoneNumber;
         }
 
-        private void LoadTripInfo (FutaBuss.Model.Trip trip)
+
+
+        private async void LoadTripInfo (FutaBuss.Model.Trip trip)
+        {
+            departureTime.Text = $"{trip.DepartureTime:hh\\:mm} {trip.DepartureDate:dd/MM/yyyy}";
+            // Lấy giờ khởi hành và ngày khởi hành từ trip
+            var departureDateTime = trip.DepartureDate.Date + trip.DepartureTime;
+
+            // Tính toán boarding time là departure time trừ đi 15 phút
+            var boardingDateTime = departureDateTime.AddMinutes(-15);
+
+            // Định dạng chuỗi để hiển thị
+            boardingTime.Text = $"Trước {boardingDateTime:hh\\:mm dd/MM/yyyy}";
+            string departure_province = await GetProvinceName(trip.DepartureProvinceCode);
+            string destination_province = await GetProvinceName(trip.DestinationProvinceCode);
+            provincePlace.Text = departure_province + " - " + destination_province;
+            int numberOfSeat = await CountSeat(booking.Id);
+            noSeat.Text = numberOfSeat.ToString() + " Ghế";
+            totalPrice.Text = $"{(numberOfSeat * trip.Price):#,0}đ";
+            totalPriceTrip = numberOfSeat * trip.Price;
+
+            List<BookingSeat> bookingSeatList = await GetAllBookingSeat(booking.Id);
+            List<string> bookingSeatAliasList = new List<string>();
+
+            foreach (BookingSeat bookingSeat in bookingSeatList)
+            {
+                string alias = GetSeatAlias(bookingSeat.SeatId, trip);
+                if (alias != null)
+                {
+                    bookingSeatAliasList.Add(alias);
+                }
+                // Nếu bạn muốn thêm một giá trị mặc định khi alias là null:
+                // bookingSeatAliasList.Add(alias ?? "Unknown");
+            }
+            string result = string.Join(", ", bookingSeatAliasList);
+            aliasSeat.Text = result;
+            pickUpLocation.Text = GetPickUpPlace(booking.PickUpLocationId, trip);
+            LoadTotalPriceInfo();
+
+        }
+
+        private void LoadTotalPriceInfo()
+        {
+            totalTicketPrice.Text = $"{(totalPriceTrip):#,0}đ" ;
+            finalTotalPrice.Text = $"{(totalPriceTrip):#,0}đ";
+        }    
 
 
         private void StartCountdown()
@@ -259,6 +350,38 @@ namespace FutaBuss.View
             UpdateQRCodeImage(data);
             UpdateQRCodeLogo(checkedRadioButton.Tag.ToString());
 
+        }
+
+        private string GetSeatAlias(Guid seatId, Trip trip)
+        {
+            foreach (var floor in trip.SeatConfig.Floors)
+            {
+                foreach (var seat in floor.Seats)
+                {
+                    if (Guid.Parse(seat.SeatId) == seatId)
+                    {
+                        return seat.Alias; // Trả về alias nếu tìm thấy seatId
+                    }
+                }
+            }
+
+            // Trả về null hoặc một giá trị mặc định nếu không tìm thấy
+            return null;
+        }
+
+
+        private string GetPickUpPlace(Guid PickUpLocationId, Trip trip)
+        {
+            foreach (var pickUp in trip.Transhipments.PickUp)
+            {
+                if (Guid.Parse(pickUp.Id) == PickUpLocationId)
+                {
+                    return pickUp.Location; // Trả về địa điểm pick-up nếu tìm thấy PickUpLocationId
+                }
+            }
+
+            // Trả về null hoặc một giá trị mặc định nếu không tìm thấy
+            return null;
         }
     }
 }

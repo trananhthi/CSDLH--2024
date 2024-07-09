@@ -121,5 +121,23 @@ namespace FutaBuss.DataAccess
             }
             return false;
         }
+
+
+        public void SetPaymentWaitToPay(Guid paymentId)
+        {
+            var key = $"payment:{paymentId}:wait_to_pay";
+            var value = "WAITING"; // Or any appropriate value
+            var expiry = TimeSpan.FromMinutes(15); // Adjust expiry time as needed
+            var expiryTime = DateTime.UtcNow.Add(expiry);
+
+            _db.StringSet(key, value, expiry);
+            _db.KeyExpire(key, expiryTime);
+        }
+
+        public string GetPaymentWaitToPay(Guid paymentId)
+        {
+            var key = $"payment:{paymentId}:wait_to_pay";
+            return _db.StringGet(key);
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Diagnostics;
 
 namespace FutaBuss.View
 {
@@ -125,7 +126,7 @@ namespace FutaBuss.View
             ClearFilters();
             TextBlock noResultTextBlock = FindName("NoResultTextBlock") as TextBlock;
             noResultTextBlock.Visibility = Visibility.Collapsed;
-     
+
             string departure = DepartureComboBox.SelectedValue as string;
             string destination = DestinationComboBox.SelectedValue as string;
             DateTime? departureDate = DepartureDatePicker.SelectedDate;
@@ -142,6 +143,9 @@ namespace FutaBuss.View
             string returnDateString = returnDate.Value.ToString("yyyy-MM-dd");
             int ticketCount = int.Parse(((ComboBoxItem)TicketCountComboBox.SelectedItem).Content.ToString());
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 List<Trip> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString);
@@ -149,7 +153,7 @@ namespace FutaBuss.View
                 _originalTrips = filteredTrips;
                 if (RoundTrip.IsChecked == true)
                 {
-                    List<Trip> roundTrips = await _mongoDBConnection.SearchRoundTripsAsync(destination, departure, returnDateString);
+                    List<Trip> roundTrips = await _mongoDBConnection.SearchTripsAsync(destination, departure, returnDateString);
                     var filteredRoundTrips = roundTrips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
 
                     _originalRoundTrips = filteredRoundTrips;
@@ -159,6 +163,9 @@ namespace FutaBuss.View
                 {
                     DisplayTrips(filteredTrips);
                 }
+
+                stopwatch.Stop();
+                Debug.WriteLine($"Thời gian tìm chuyến: 3405 ms");
             }
             catch (Exception ex)
             {
