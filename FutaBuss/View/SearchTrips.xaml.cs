@@ -200,12 +200,6 @@ namespace FutaBuss.View
                     return;
                 }
             }
-            //string tripId = trip["id"].ToString();
-            //Booking bookingWindow = new Booking(tripId);
-            //bookingWindow.Show();
-
-            Debug.WriteLine($"Id for departure trip: {_departureTripid}");
-            Debug.WriteLine($"Id for return trip: {_returnTripid}");
 
              this.NavigationService.Navigate(new FutaBuss.View.Booking(_departureTripid, _returnTripid));
         }
@@ -375,11 +369,6 @@ namespace FutaBuss.View
             bool morning = MorningCheckBox.IsChecked ?? false;
             bool afternoon = AfternoonCheckBox.IsChecked ?? false;
             bool evening = EveningCheckBox.IsChecked ?? false;
-            Debug.WriteLine($"Early Morning: {earlyMorning}");
-            Debug.WriteLine($"Morning: {morning}");
-            Debug.WriteLine($"Afternoon: {afternoon}");
-            Debug.WriteLine($"Evening: {evening}");
-
             if (earlyMorning == false && morning == false && afternoon == false && evening == false)
             {
                 earlyMorning = true;
@@ -392,10 +381,6 @@ namespace FutaBuss.View
             bool sleeperBus = SleeperBusButton.Tag?.ToString() == "active";
             bool limousine = LimousineButton.Tag?.ToString() == "active";
 
-            Debug.WriteLine($"Seated Bus: {seatedBus}");
-            Debug.WriteLine($"Sleeper Bus: {sleeperBus}");
-            Debug.WriteLine($"Limousine: {limousine}");
-
             if (!seatedBus && !sleeperBus && !limousine)
             {
                 seatedBus = true;
@@ -406,9 +391,6 @@ namespace FutaBuss.View
             bool middleRow = MiddleRowButton.Tag?.ToString() == "active";
             bool frontRow = FrontRowButton.Tag?.ToString() == "active";
             bool lastRow = LastRowButton.Tag?.ToString() == "active";
-            Debug.WriteLine($"Middle Row: {middleRow}");
-            Debug.WriteLine($"Front Row: {frontRow}");
-            Debug.WriteLine($"Last Row: {lastRow}");
 
             if (!middleRow && !frontRow && !lastRow)
             {
@@ -419,16 +401,12 @@ namespace FutaBuss.View
 
             bool upperFloor = UpperFloorButton.Tag?.ToString() == "active";
             bool lowerFloor = LowerFloorButton.Tag?.ToString() == "active";
-            Debug.WriteLine($"Upper Floor: {upperFloor}");
-            Debug.WriteLine($"Lower Floor: {lowerFloor}");
 
             if (!upperFloor && !lowerFloor)
             {
                 upperFloor = true;
                 lowerFloor = true;
             }
-
-            Debug.WriteLine("ApplyFilters called");
 
             // Khởi tạo FilteredTrips là ObservableCollection<BsonDocument>
             List<Trip> FilteredTrips = new List<Trip>();
@@ -452,13 +430,11 @@ namespace FutaBuss.View
                                      (morning && departureDateTime.Hour >= 6 && departureDateTime.Hour < 12) ||
                                      (afternoon && departureDateTime.Hour >= 12 && departureDateTime.Hour < 18) ||
                                      (evening && departureDateTime.Hour >= 18 && departureDateTime.Hour < 24);
-                Debug.WriteLine($"Time Condition for trip {trip.TripId}: {timeCondition}");
 
                 // Type condition
                 bool typeCondition = (seatedBus && tripType == "seated_bus") ||
                                      (sleeperBus && tripType == "sleeper_bus") ||
                                      (limousine && tripType == "limousine");
-                Debug.WriteLine($"Type Condition for trip {trip.TripId}: {typeCondition}");
 
                 // Row condition
                 bool rowCondition = false;
@@ -474,12 +450,10 @@ namespace FutaBuss.View
                         break;
                     }
                 }
-                Debug.WriteLine($"Row Condition for trip {trip.TripId}: {rowCondition}");
 
                 // Floor condition
                 bool floorCondition = (upperFloor && floorsArray.Any(floor => floor.Ordinal == 1)) ||
                                       (lowerFloor && floorsArray.Any(floor => floor.Ordinal == 2));
-                Debug.WriteLine($"Floor Condition for trip {trip.TripId}: {floorCondition}");
 
                 // Kiểm tra tất cả các điều kiện
                 if (timeCondition && typeCondition && rowCondition && floorCondition)
@@ -508,13 +482,11 @@ namespace FutaBuss.View
                                              (morning && departureDateTime.Hour >= 6 && departureDateTime.Hour < 12) ||
                                              (afternoon && departureDateTime.Hour >= 12 && departureDateTime.Hour < 18) ||
                                              (evening && departureDateTime.Hour >= 18 && departureDateTime.Hour < 24);
-                        Debug.WriteLine($"Time Condition for trip {trip.TripId}: {timeCondition}");
 
                         // Type condition
                         bool typeCondition = (seatedBus && tripType == "seated_bus") ||
                                              (sleeperBus && tripType == "sleeper_bus") ||
                                              (limousine && tripType == "limousine");
-                        Debug.WriteLine($"Type Condition for trip {trip.TripId}: {typeCondition}");
 
                         // Row condition
                         bool rowCondition = false;
@@ -530,12 +502,9 @@ namespace FutaBuss.View
                                 break;
                             }
                         }
-                        Debug.WriteLine($"Row Condition for trip {trip.TripId}: {rowCondition}");
-
                         // Floor condition
                         bool floorCondition = (upperFloor && floorsArray.Any(floor => floor.Ordinal == 1)) ||
                                               (lowerFloor && floorsArray.Any(floor => floor.Ordinal == 2));
-                        Debug.WriteLine($"Floor Condition for trip {trip.TripId}: {floorCondition}");
 
                         // Kiểm tra tất cả các điều kiện
                         if (timeCondition && typeCondition && rowCondition && floorCondition)
@@ -545,8 +514,6 @@ namespace FutaBuss.View
                         }
                     }
                 }
-
-                Debug.WriteLine($"Filtered Trips: {FilteredTrips.Count}");
 
             // Hiển thị các chuyến xe đã lọc
             
@@ -644,7 +611,6 @@ namespace FutaBuss.View
 
                 // Loại xe
                 string tripTypeCode = trip.TripType.ToString();
-                Debug.WriteLine(tripTypeCode);
                 string tripTypeText = tripTypeCode switch
                 {
                     "seated_bus" => "Ghế",
@@ -950,7 +916,6 @@ namespace FutaBuss.View
 
                 // Loại xe
                 string tripTypeCode = trip.TripType.ToString();
-                Debug.WriteLine(tripTypeCode);
                 string tripTypeText = tripTypeCode switch
                 {
                     "seated_bus" => "Ghế",
