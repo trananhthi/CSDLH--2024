@@ -235,7 +235,14 @@ namespace FutaBuss.View
         {
             button.FontWeight = FontWeights.Normal;
             button.BorderThickness = new Thickness(0);
+            button.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF000000"));
             button.Tag = "inactive";
+
+            var buttonName = button.Name;
+            var boderButtonName = $"{buttonName}Border";
+
+            Border buttonBorDer = FindName($"{boderButtonName}") as Border;
+            buttonBorDer.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFD3D3D3"));
         }
 
         private int CountEmptySeats(Trip trip)

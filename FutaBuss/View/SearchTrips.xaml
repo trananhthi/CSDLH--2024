@@ -175,13 +175,13 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Border x:Name="SeatedBusButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5,5,5,5" Width="50" HorizontalAlignment="Left">
-                            <Button x:Name="SeatedBusButton" Content="Ghế" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="SeatedBusButton" Content="Ghế" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                         <Border x:Name="SleeperBusButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5,5,5,5" Grid.Column="1" Width="73">
-                            <Button x:Name="SleeperBusButton" Content="Giường" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="SleeperBusButton" Content="Giường" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                         <Border x:Name="LimousineButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Grid.Column="2" HorizontalAlignment="Right">
-                            <Button x:Name="LimousineButton" Content="Limousine" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Width="80" Padding="1,5,1,5"/>
+                            <Button x:Name="LimousineButton" Content="Limousine" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Width="80" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                     </Grid>
 
@@ -193,13 +193,13 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Border x:Name="MiddleRowButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Width="80">
-                            <Button x:Name="MiddleRowButton" Content="Hàng giữa" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="MiddleRowButton" Content="Hàng giữa" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                         <Border x:Name="FrontRowButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Grid.Column="1" Width="80">
-                            <Button x:Name="FrontRowButton" Content="Hàng đầu" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="FrontRowButton" Content="Hàng đầu" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                         <Border x:Name="LastRowButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Grid.Column="2" Width="83">
-                            <Button x:Name="LastRowButton" Content="Hàng cuối" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="LastRowButton" Content="Hàng cuối" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                     </Grid>
 
@@ -210,10 +210,10 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Border x:Name="UpperFloorButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Width="70">
-                            <Button x:Name="UpperFloorButton" Content="Tầng trên" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="UpperFloorButton" Content="Tầng trên" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                         <Border x:Name="LowerFloorButtonBorder" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Margin="5" Grid.Column="1" Width="70">
-                            <Button x:Name="LowerFloorButton" Content="Tầng dưới" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5"/>
+                            <Button x:Name="LowerFloorButton" Content="Tầng dưới" Click="FilterButton_Click" Background="{x:Null}" BorderBrush="{x:Null}" Padding="1,5,1,5" BorderThickness="0"/>
                         </Border>
                     </Grid>
                 </StackPanel>
