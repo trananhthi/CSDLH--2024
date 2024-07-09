@@ -185,7 +185,7 @@
                             </GroupBox.Header>
                             <StackPanel Margin="10">
                                 <TextBlock Text="Điểm đón" Margin="0,0,0,5" FontSize="15"/>
-                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="PickUpComboBox" SelectedIndex="0">
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="PickUpComboBox" SelectedIndex="0" SelectionChanged="PickUpComboBox_SelectionChanged">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock FontSize="14">
@@ -201,7 +201,7 @@
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                                 <TextBlock Text="Điểm trả" Margin="0,0,0,5" FontSize="15"/>
-                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="DropOffComboBox" SelectedIndex="0">
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="DropOffComboBox" SelectedIndex="0" SelectionChanged="DropOffComboBox_SelectionChanged">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock FontSize="14">
@@ -305,7 +305,7 @@
                             </GroupBox.Header>
                             <StackPanel Margin="10">
                                 <TextBlock Text="Điểm đón" Margin="0,0,0,5" FontSize="15"/>
-                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnPickUpComboBox" SelectedIndex="0">
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnPickUpComboBox" SelectedIndex="0" SelectionChanged="ReturnPickUpComboBox_SelectionChanged">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock FontSize="14">
@@ -321,7 +321,7 @@
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                                 <TextBlock Text="Điểm trả" Margin="0,0,0,5" FontSize="15"/>
-                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnDropOffComboBox" SelectedIndex="0">
+                                <ComboBox Margin="0,0,0,10" FontSize="14" x:Name="ReturnDropOffComboBox" SelectedIndex="0" SelectionChanged="ReturnDropOffComboBox_SelectionChanged">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock FontSize="14">
