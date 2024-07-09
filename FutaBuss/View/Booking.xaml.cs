@@ -438,7 +438,7 @@ namespace FutaBuss.View
                 _redisConnection.CacheBooking(returnBooking.Id, user.Id, returnSeatIds);
                 await _cassandraDBConnection.AddBookingAsync(returnBooking, returnSeatIds);
             }
-            this.NavigationService.Navigate(new PaymentMethod());
+            this.NavigationService.Navigate(new PaymentMethod(Guid.Parse("e9c7754a-3667-479b-b399-a27e2ee22048")));
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)

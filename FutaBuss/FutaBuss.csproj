@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="Images\futapay.svg" />
     <None Remove="Images\momo.svg" />
+    <None Remove="Images\payment_success.jpg" />
     <None Remove="Images\seat_disabled.png" />
     <None Remove="Images\seat_selecting.png" />
     <None Remove="Images\shopee.png" />
@@ -37,6 +38,7 @@
   <ItemGroup>
     <Resource Include="Images\futapay.svg" />
     <Resource Include="Images\momo.svg" />
+    <Resource Include="Images\payment_success.jpg" />
     <Resource Include="Images\seat_active.png" />
     <Resource Include="Images\seat_disabled.png" />
     <Resource Include="Images\seat_selecting.png" />

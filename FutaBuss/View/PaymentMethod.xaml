@@ -169,11 +169,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Họ và tên" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="fullName" Text="thi anh trân" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="fullName" Text="" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
                         <TextBlock Text="Số điện thoại" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="phoneNumber" Text="0123456789" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold" />
+                        <TextBlock x:Name="phoneNumber" Text="" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold" />
                         <TextBlock Text="Email" Grid.Row="2" Grid.Column="0" Margin="0,0,10,0" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="email" Text="trananh@gmail.com" Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" FontSize="14"  FontWeight="SemiBold"/>
+                        <TextBlock x:Name="email" Text="" Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" FontSize="14"  FontWeight="SemiBold"/>
                     </Grid>
                 </StackPanel>
             </Border>

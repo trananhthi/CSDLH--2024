@@ -1,0 +1,76 @@
+﻿<Page x:Class="FutaBuss.View.PaymentSuccess"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:FutaBuss.View"
+      mc:Ignorable="d" 
+      d:DesignHeight="700" d:DesignWidth="1200"
+      Title="PaymentSuccess">
+
+    <Grid Background="White">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20">
+            <Image Source="../Images/payment_success.jpg" Width="100" Height="100" HorizontalAlignment="Center"/>
+            <TextBlock Text="Mua vé xe thành công" FontSize="24" FontWeight="Bold" Foreground="#2D9CDB" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+            <TextBlock Text="FUTA Bus Lines đã gửi thông tin vé đã đặt về địa chỉ email duong.nguyen@vato.vn. Vui lòng kiểm tra lại." 
+                       FontSize="16" Foreground="#828282" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0"/>
+
+            <Grid Margin="0,20,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Background="#ffffff" CornerRadius="10" BorderThickness="1" BorderBrush="#e0e0e0" Padding="20,30,20,30" >
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="157*"/>
+                                <ColumnDefinition Width="193*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="271*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Họ và tên:" FontWeight="Bold" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,-11,99,11"/>
+                            <TextBlock Text="Nguyễn Phan Tùng Dương" Grid.Column="1" Grid.ColumnSpan="3" Margin="99,-11,19,11"/>
+                            <TextBlock Text="Tổng giá vé:" FontWeight="Bold" Grid.Column="2" Grid.ColumnSpan="3" Margin="197,-11,269,11"/>
+                            <TextBlock Text="2,000,000đ" Grid.Column="3" Grid.ColumnSpan="2" Margin="55,-11,129,11"/>
+
+                            <TextBlock Text="Số điện thoại:" FontWeight="Bold" Grid.Column="0" Margin="0,7,79,3" Grid.ColumnSpan="2"/>
+                            <TextBlock Text="0912345678" Grid.Column="1" Margin="99,7,241,3" Grid.ColumnSpan="4"/>
+                            <TextBlock Text="PTTT:" FontWeight="Bold" Grid.Column="2" Margin="197,7,305,3" Grid.ColumnSpan="3"/>
+                            <TextBlock Text="FUTAPay" Grid.Column="3" Margin="54,7,129,3" Grid.ColumnSpan="2"/>
+
+                            <TextBlock Text="Email:" FontWeight="Bold" Grid.Column="0" Margin="0,28,79,-18" Grid.ColumnSpan="2"/>
+                            <TextBlock Text="duong.nguyen@futa.vn" Margin="99,28,89,-18" Grid.Column="1" Grid.ColumnSpan="3"/>
+                            <TextBlock Text="Trạng thái:" FontWeight="Bold" Grid.Column="2" Margin="197,26,269,-16" Grid.ColumnSpan="3"/>
+                            <TextBlock Text="Thanh toán thành công" Foreground="#27ae60" Grid.Column="3" Margin="54,26,129,-16" Grid.ColumnSpan="2"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <ItemsControl Margin="0,20,0,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#ffffff" CornerRadius="10" BorderThickness="1" BorderBrush="#e0e0e0" Margin="10" Width="200">
+                            <StackPanel Margin="10">
+                                <Image Source="qrcode.png" Width="150" Height="150" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Mã vé E7GZF8" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                                <TextBlock Text="Sài Gòn - Cần Thơ" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Thời gian: 23:00 27/05/2022" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Số ghế: A08" HorizontalAlignment="Center"/>
+                                <TextBlock Text="VP BX Miền Tây" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Giá vé: 160,000đ" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</Page>

@@ -8,6 +8,8 @@ using ZXing.QrCode;
 using ZXing.Windows.Compatibility;
 using System.IO;
 using System.Windows.Threading;
+using FutaBuss.DataAccess;
+using FutaBuss.Model;
 
 namespace FutaBuss.View
 {
@@ -18,14 +20,106 @@ namespace FutaBuss.View
     {
         private DispatcherTimer timer;
         private int countdownSeconds = 100; // Thời gian đếm ngược, đơn vị là giây
+        private FutaBuss.Model.Booking booking;
+        private FutaBuss.Model.User customer;
+        private FutaBuss.Model.Trip trip;
 
-        public PaymentMethod()
+        private MongoDBConnection _mongoDBConnection;
+        private RedisConnection _redisConnection;
+        private PostgreSQLConnection _postgreSQLConnection;
+        private CassandraDBConnection _cassandraDBConnection;
+
+        public PaymentMethod(Guid bookingId, Guid? returnBookingId = null)
         {
             InitializeComponent();
+            InitializeDatabaseConnections();
+           
             futaPayRadioButton.IsChecked = true;
             StartCountdown();
-            
+            InitializeAsync(bookingId, returnBookingId);
+           
+
         }
+
+        public async Task InitializeAsync(Guid bookingId, Guid? returnBookingId = null)
+        {
+            // Gọi phương thức GetBookingAsync và đợi cho đến khi hoàn thành
+            booking = await GetBookingAsync(bookingId); // Thay Guid.NewGuid() bằng bookingId thích hợp
+            customer = await GetCustomerAsync(booking.UserId);
+            trip = await GetTripAsync(booking.TripId);
+            LoadCustomerInfo(customer);
+        }
+
+        private void InitializeDatabaseConnections()
+        {
+            try
+            {
+                _mongoDBConnection = MongoDBConnection.Instance;
+                _redisConnection = RedisConnection.Instance;
+                _postgreSQLConnection = PostgreSQLConnection.Instance;
+                _cassandraDBConnection = CassandraDBConnection.Instance;
+            }
+            catch (ApplicationException ex)
+            {
+                MessageBox.Show(ex.Message, "Database Connection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task<FutaBuss.Model.Booking> GetBookingAsync(Guid bookingId)
+        {
+            try
+            {
+                return await _cassandraDBConnection.GetBookingByIdAsync(bookingId);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+        private async Task<FutaBuss.Model.User> GetCustomerAsync(Guid customerId)
+        {
+            try
+            {
+                return await _cassandraDBConnection.GetCustomerByIdAsync(customerId);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+
+        private async Task<FutaBuss.Model.Trip> GetTripAsync(string tripId)
+        {
+            try
+            {
+                return await _mongoDBConnection.GetTripByIdAsync(tripId);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ nếu cần thiết
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; // hoặc xử lý ngoại lệ theo nhu cầu của bạn
+            }
+        }
+
+        private void LoadCustomerInfo (FutaBuss.Model.User customer)
+        {
+            fullName.Text = customer.FullName;
+            email.Text = customer.Email;
+            phoneNumber.Text = customer.PhoneNumber;
+        }
+
+        private void LoadTripInfo (FutaBuss.Model.Trip trip)
 
 
         private void StartCountdown()

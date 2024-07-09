@@ -54,5 +54,13 @@ namespace FutaBuss.DataAccess
 
             return await collection.Find(filter).ToListAsync();
         }
+
+        public async Task<Trip> GetTripByIdAsync(string tripId)
+        {
+            var collection = _database.GetCollection<Trip>("trips");
+            var filter = Builders<Trip>.Filter.Eq("_id", ObjectId.Parse(tripId)); 
+
+            return await collection.Find(filter).FirstOrDefaultAsync();
+        }
     }
 }

@@ -72,5 +72,61 @@ namespace FutaBuss.DataAccess
                 await _session.ExecuteAsync(boundStatementSeat);
             }
         }
+
+
+        public async Task<Booking> GetBookingByIdAsync(Guid bookingId)
+        {
+            var selectQuery = "SELECT * FROM Booking WHERE id = ?";
+            var preparedStatement = await _session.PrepareAsync(selectQuery);
+            var boundStatement = preparedStatement.Bind(bookingId);
+
+            var resultSet = await _session.ExecuteAsync(boundStatement);
+
+            var row = resultSet.FirstOrDefault(); // Chỉ lấy bản ghi đầu tiên nếu có
+
+            if (row != null)
+            {
+                var booking = new Booking
+                {
+                    Id = row.GetValue<Guid>("id"),
+                    UserId = row.GetValue<Guid>("user_id"),
+                    TripId = row.GetValue<string>("trip_id"),
+                    CreatedAt = row.GetValue<DateTime>("created_at")
+                    // Các trường thông tin khác của Booking nếu có
+                };
+
+                return booking;
+            }
+
+            return null; // Trả về null nếu không tìm thấy booking có id tương ứng
+        }
+
+
+        public async Task<User> GetCustomerByIdAsync(Guid customerId)
+        {
+            var selectQuery = "SELECT * FROM customer WHERE id = ?";
+            var preparedStatement = await _session.PrepareAsync(selectQuery);
+            var boundStatement = preparedStatement.Bind(customerId);
+
+            var resultSet = await _session.ExecuteAsync(boundStatement);
+
+            var row = resultSet.FirstOrDefault(); // Chỉ lấy bản ghi đầu tiên nếu có
+
+            if (row != null)
+            {
+                var user = new User
+                {
+                    Id = row.GetValue<Guid>("id"),
+                    FullName = row.GetValue<string>("fullname"),
+                    Email = row.GetValue<string>("email"),
+                    PhoneNumber = row.GetValue<string>("phonenumber")
+                    // Các trường thông tin khác của Booking nếu có
+                };
+
+                return user;
+            }
+
+            return null; // Trả về null nếu không tìm thấy booking có id tương ứng
+        }
     }
 }
