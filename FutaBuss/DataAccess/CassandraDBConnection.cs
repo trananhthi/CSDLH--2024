@@ -116,6 +116,10 @@ namespace FutaBuss.DataAccess
             );
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            var mongoDB = MongoDBConnection.Instance;
+            var updateTasks = bookingSeats.Select(bookingSeat => mongoDB.UpdateSeatIsSoldAsync(booking.TripId.ToString(), bookingSeat.SeatId.ToString()));
+            await Task.WhenAll(updateTasks).ConfigureAwait(false);
         }
 
         public async Task<Booking> GetBookingByIdAsync(Guid bookingId)
