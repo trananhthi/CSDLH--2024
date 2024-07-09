@@ -153,16 +153,19 @@ namespace FutaBuss.View
 
             try
             {
-                List<Trip> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString, ticketCount);
-                _originalTrips = trips;
+                List<Trip> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString);
+                var filteredTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+                _originalTrips = filteredTrips;
                 if (RoundTrip.IsChecked == true)
                 {
-                    List<Trip> roundTrips = await _mongoDBConnection.SearchRoundTripsAsync(destination, departure, returnDateString, ticketCount);
-                    _originalRoundTrips = roundTrips;
-                    DisplayRoundTrips(trips, roundTrips);
+                    List<Trip> roundTrips = await _mongoDBConnection.SearchRoundTripsAsync(destination, departure, returnDateString);
+                    var filteredRoundTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+
+                    _originalRoundTrips = filteredRoundTrips;
+                    DisplayRoundTrips(filteredTrips, filteredRoundTrips);
                 }
                 else{
-                    DisplayTrips(trips); 
+                    DisplayTrips(filteredTrips); 
                 }
             }
             catch (Exception ex)
@@ -175,11 +178,11 @@ namespace FutaBuss.View
         {
             if (tripType == "Chuyến đi")
             {
-                _departureTripid = trip.TripId;
+                _departureTripid = trip.Id;
             }
-            else if (tripType == "Chuyến về")
+            else
             {
-                _returnTripid = trip.TripId;
+                _returnTripid = trip.Id;
             }
 
             var isRoundTrip = RoundTrip.IsChecked;
@@ -285,72 +288,81 @@ namespace FutaBuss.View
             Button clickedButton = sender as Button;
             clickedButton.Tag = "active";
 
+            clickedButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFA5400"));
+            var buttonName = clickedButton.Name;
+            var boderButtonName = $"{buttonName}Border";
+
+            Border buttonBorDer = FindName($"{boderButtonName}") as Border;
+            buttonBorDer.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFA5400"));
+
             // Dựa vào tên của button để xác định loại xe, hàng ghế, tầng và cập nhật trạng thái checked/unchecked
-            switch (clickedButton.Name)
-            {
-                case "SeatedBusButton":
-                    SeatedBusButton.FontWeight = FontWeights.Bold;
-                    SeatedBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    SleeperBusButton.FontWeight = FontWeights.Normal;
-                    SleeperBusButton.BorderThickness = new Thickness(0);
-                    LimousineButton.FontWeight = FontWeights.Normal;
-                    LimousineButton.BorderThickness = new Thickness(0);
-                    break;
-                case "SleeperBusButton":
-                    SleeperBusButton.FontWeight = FontWeights.Bold;
-                    SleeperBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    SeatedBusButton.FontWeight = FontWeights.Normal;
-                    SeatedBusButton.BorderThickness = new Thickness(0);
-                    LimousineButton.FontWeight = FontWeights.Normal;
-                    LimousineButton.BorderThickness = new Thickness(0);
-                    break;
-                case "LimousineButton":
-                    LimousineButton.FontWeight = FontWeights.Bold;
-                    LimousineButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    SeatedBusButton.FontWeight = FontWeights.Normal;
-                    SeatedBusButton.BorderThickness = new Thickness(0);
-                    SleeperBusButton.FontWeight = FontWeights.Normal;
-                    SleeperBusButton.BorderThickness = new Thickness(0);
-                    break;
-                case "MiddleRowButton":
-                    MiddleRowButton.FontWeight = FontWeights.Bold;
-                    MiddleRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    FrontRowButton.FontWeight = FontWeights.Normal;
-                    FrontRowButton.BorderThickness = new Thickness(0);
-                    LastRowButton.FontWeight = FontWeights.Normal;
-                    LastRowButton.BorderThickness = new Thickness(0);
-                    break;
-                case "FrontRowButton":
-                    FrontRowButton.FontWeight = FontWeights.Bold;
-                    FrontRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    MiddleRowButton.FontWeight = FontWeights.Normal;
-                    MiddleRowButton.BorderThickness = new Thickness(0);
-                    LastRowButton.FontWeight = FontWeights.Normal;
-                    LastRowButton.BorderThickness = new Thickness(0);
-                    break;
-                case "LastRowButton":
-                    LastRowButton.FontWeight = FontWeights.Bold;
-                    LastRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    MiddleRowButton.FontWeight = FontWeights.Normal;
-                    MiddleRowButton.BorderThickness = new Thickness(0);
-                    FrontRowButton.FontWeight = FontWeights.Normal;
-                    FrontRowButton.BorderThickness = new Thickness(0);
-                    break;
-                case "UpperFloorButton":
-                    UpperFloorButton.FontWeight = FontWeights.Bold;
-                    UpperFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    LowerFloorButton.FontWeight = FontWeights.Normal;
-                    LowerFloorButton.BorderThickness = new Thickness(0);
-                    break;
-                case "LowerFloorButton":
-                    LowerFloorButton.FontWeight = FontWeights.Bold;
-                    LowerFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
-                    UpperFloorButton.FontWeight = FontWeights.Normal;
-                    UpperFloorButton.BorderThickness = new Thickness(0);
-                    break;
-                default:
-                    break;
-            }
+            //switch (clickedButton.Name)
+            //{
+            //    case "SeatedBusButton":
+            //        SeatedBusButton.FontWeight = FontWeights.Bold;
+            //        SeatedBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        SleeperBusButton.FontWeight = FontWeights.Normal;
+            //        SleeperBusButton.BorderThickness = new Thickness(0);
+            //        LimousineButton.FontWeight = FontWeights.Normal;
+            //        LimousineButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "SleeperBusButton":
+            //        SleeperBusButton.FontWeight = FontWeights.Bold;
+            //        SleeperBusButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        SeatedBusButton.FontWeight = FontWeights.Normal;
+            //        SeatedBusButton.BorderThickness = new Thickness(0);
+            //        LimousineButton.FontWeight = FontWeights.Normal;
+            //        LimousineButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "LimousineButton":
+            //        LimousineButton.FontWeight = FontWeights.Bold;
+            //        LimousineButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        SeatedBusButton.FontWeight = FontWeights.Normal;
+            //        SeatedBusButton.BorderThickness = new Thickness(0);
+            //        SleeperBusButton.FontWeight = FontWeights.Normal;
+            //        SleeperBusButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "MiddleRowButton":
+            //        MiddleRowButton.FontWeight = FontWeights.Bold;
+            //        MiddleRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        FrontRowButton.FontWeight = FontWeights.Normal;
+            //        FrontRowButton.BorderThickness = new Thickness(0);
+            //        LastRowButton.FontWeight = FontWeights.Normal;
+            //        LastRowButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "FrontRowButton":
+            //        FrontRowButton.FontWeight = FontWeights.Bold;
+            //        FrontRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        MiddleRowButton.FontWeight = FontWeights.Normal;
+            //        MiddleRowButton.BorderThickness = new Thickness(0);
+            //        LastRowButton.FontWeight = FontWeights.Normal;
+            //        LastRowButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "LastRowButton":
+            //        LastRowButton.FontWeight = FontWeights.Bold;
+            //        LastRowButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        MiddleRowButton.FontWeight = FontWeights.Normal;
+            //        MiddleRowButton.BorderThickness = new Thickness(0);
+            //        FrontRowButton.FontWeight = FontWeights.Normal;
+            //        FrontRowButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "UpperFloorButton":
+            //        UpperFloorButton.FontWeight = FontWeights.Bold;
+            //        UpperFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        LowerFloorButton.FontWeight = FontWeights.Normal;
+            //        LowerFloorButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    case "LowerFloorButton":
+            //        LowerFloorButton.FontWeight = FontWeights.Bold;
+            //        LowerFloorButton.BorderThickness = new Thickness(0, 0, 0, 2);
+            //        UpperFloorButton.FontWeight = FontWeights.Normal;
+            //        UpperFloorButton.BorderThickness = new Thickness(0);
+            //        break;
+            //    default:
+            //        break;
+            //}
+
+
 
             // Gọi lại hàm ApplyFilters để áp dụng bộ lọc
             ApplyFilters();
@@ -1026,7 +1038,7 @@ namespace FutaBuss.View
                     Foreground = Brushes.White,
                     Padding = new Thickness(5, 2, 5, 2)
                 };
-                selectButton.Click += (sender, e) => SelectTrip(trip, tripType);
+                selectButton.Click += (sender, e) => SelectTrip(trip, tripType.ToString());
 
                 Border buttonBorder = new Border
                 {

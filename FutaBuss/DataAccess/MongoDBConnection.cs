@@ -35,7 +35,7 @@ namespace FutaBuss.DataAccess
             return _database.GetCollection<T>(collectionName);
         }
 
-        public async Task<List<Trip>> SearchTripsAsync(string departure, string destination, string departureDate, int ticketCount)
+        public async Task<List<Trip>> SearchTripsAsync(string departure, string destination, string departureDate)
         {
             var collection = _database.GetCollection<Trip>("trips");
             var filter = Builders<Trip>.Filter.Eq("departure_province_code", departure)
@@ -45,7 +45,7 @@ namespace FutaBuss.DataAccess
             return await collection.Find(filter).ToListAsync();
         }
 
-        public async Task<List<Trip>> SearchRoundTripsAsync(string departure, string destination, string departureDate, int ticketCount)
+        public async Task<List<Trip>> SearchRoundTripsAsync(string departure, string destination, string departureDate)
         {
             var collection = _database.GetCollection<Trip>("trips");
             var filter = Builders<Trip>.Filter.Eq("departure_province_code", departure)
