@@ -1,6 +1,7 @@
 ﻿using Cassandra;
 using FutaBuss.Model;
 using System.IO;
+using System.Windows.Controls.Primitives;
 
 namespace FutaBuss.DataAccess
 {
@@ -299,6 +300,39 @@ namespace FutaBuss.DataAccess
                 throw new ApplicationException("Error creating payment: " + ex.Message, ex);
             }
         }
+        
+
+        public List<Ticket> GetAllTicketByPaymentId(Guid paymentId)
+        {
+            try
+            {
+                var statement = new SimpleStatement("SELECT * FROM Ticket WHERE payment_id = ? ALLOW FILTERING", paymentId);
+                var resultSet = _session.Execute(statement);
+
+                var tickets = new List<Ticket>();
+                foreach (var row in resultSet)
+                {
+                    var ticket = new Ticket
+                    {
+                        Id = row.GetValue<Guid>("id"),
+                        CustomerId = row.GetValue<Guid>("customer_id"),
+                        SeatId = row.GetValue<Guid>("seat_id"),
+                        TripId = row.GetValue<string>("trip_id"),
+                        PickUpLocationId = row.GetValue<Guid>("pickup_location_id"),
+                        DropOffLocationId = row.GetValue<Guid>("dropoff_location_id"),
+                        PaymentId = row.GetValue<Guid>("payment_id"),
+                    };
+                    tickets.Add(ticket);
+                }
+
+                return tickets;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error retrieving booking seats: " + ex.Message, ex);
+            }
+        }
+
 
 
 

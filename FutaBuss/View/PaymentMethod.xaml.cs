@@ -10,7 +10,6 @@ using System.IO;
 using System.Windows.Threading;
 using FutaBuss.DataAccess;
 using FutaBuss.Model;
-using static MongoDB.Driver.WriteConcern;
 
 namespace FutaBuss.View
 {
@@ -117,7 +116,7 @@ namespace FutaBuss.View
             }
         }
 
-        private async Task<FutaBuss.Model.User> GetCustomerAsync(Guid customerId)
+        private async Task<FutaBuss.Model.Customer> GetCustomerAsync(Guid customerId)
         {
             try
             {
@@ -322,10 +321,8 @@ namespace FutaBuss.View
         private void LoadTotalPriceInfo()
         {
             totalTicketPrice.Text = $"{(totalPriceTrip):#,0}đ" ;
-            if(returnBooking != null)
-            {
-                returnTotalTicketPrice.Text = $"{(returnTotalPriceTrip):#,0}đ";
-            }    
+            returnTotalTicketPrice.Text = $"{(returnTotalPriceTrip):#,0}đ";
+
             finalTotalPrice.Text = $"{(totalPriceTrip + returnTotalPriceTrip):#,0}đ";
             finalTotalPriceHeader.Text = $"{(totalPriceTrip + returnTotalPriceTrip):#,0}đ";
         }    
@@ -546,14 +543,14 @@ namespace FutaBuss.View
             {
                 foreach (BookingSeat bookingSeat in returnBookingSeatList)
                 {
-                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId.ToString().Replace("-", "")}");
 
                 }
             }
 
-            
 
-            this.NavigationService.Navigate(new PaymentSuccess());
+
+            this.NavigationService.Navigate(new PaymentSuccess(customer,totalPriceTrip + returnTotalPriceTrip, paymentMethod, newPaymentId));
 
         }
 
@@ -563,7 +560,7 @@ namespace FutaBuss.View
 
             foreach (BookingSeat bookingSeat in bookingSeatList)
             {
-                _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+                _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId.ToString().Replace("-", "")}");
 
             }
 
@@ -571,7 +568,7 @@ namespace FutaBuss.View
             {
                 foreach (BookingSeat bookingSeat in returnBookingSeatList)
                 {
-                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId.ToString().Replace("-", "")}");
 
                 }
             }

@@ -17,8 +17,8 @@ namespace FutaBuss.View
         private MongoDBConnection _mongoDBConnection;
         private RedisConnection _redisConnection;
         private PostgreSQLConnection _postgreSQLConnection;
-        private MongoClient client;
-        private IMongoDatabase database;
+        //private MongoClient client;
+        //private IMongoDatabase database;
         private IMongoCollection<Trip> tripsCollection;
         private Dictionary<string, string> _provinceDictionary;
         private List<Trip> _originalTrips;
@@ -121,6 +121,59 @@ namespace FutaBuss.View
             DestinationComboBox.ItemsSource = provinces;
         }
 
+        //private async void SearchTripsButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ClearFilters();
+        //    TextBlock noResultTextBlock = FindName("NoResultTextBlock") as TextBlock;
+        //    noResultTextBlock.Visibility = Visibility.Collapsed;
+
+        //    string departure = DepartureComboBox.SelectedValue as string;
+        //    string destination = DestinationComboBox.SelectedValue as string;
+        //    DateTime? departureDate = DepartureDatePicker.SelectedDate;
+        //    DateTime? returnDate = ReturnDatePicker.SelectedDate;
+
+
+        //    if (departureDate == null)
+        //    {
+        //        MessageBox.Show("Vui lòng chọn ngày khởi hành.");
+        //        return;
+        //    }
+
+        //    string departureDateString = departureDate.Value.ToString("yyyy-MM-dd");
+        //    string returnDateString = returnDate.Value.ToString("yyyy-MM-dd");
+        //    int ticketCount = int.Parse(((ComboBoxItem)TicketCountComboBox.SelectedItem).Content.ToString());
+
+        //    Stopwatch stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+
+        //    try
+        //    {
+        //        List<Trip> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString);
+        //        var filteredTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+        //        _originalTrips = filteredTrips;
+        //        if (RoundTrip.IsChecked == true)
+        //        {
+        //            List<Trip> roundTrips = await _mongoDBConnection.SearchTripsAsync(destination, departure, returnDateString);
+        //            var filteredRoundTrips = roundTrips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+
+        //            _originalRoundTrips = filteredRoundTrips;
+        //            DisplayRoundTrips(filteredTrips, filteredRoundTrips);
+        //        }
+        //        else
+        //        {
+        //            DisplayTrips(filteredTrips);
+        //        }
+
+        //        stopwatch.Stop();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Lỗi khi tìm kiếm chuyến: {ex.Message}");
+        //    }
+        //}
+
+
         private async void SearchTripsButton_Click(object sender, RoutedEventArgs e)
         {
             ClearFilters();
@@ -149,23 +202,25 @@ namespace FutaBuss.View
             try
             {
                 List<Trip> trips = await _mongoDBConnection.SearchTripsAsync(departure, destination, departureDateString);
-                var filteredTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
-                _originalTrips = filteredTrips;
+                //var filteredTrips = trips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+                _originalTrips = trips;
                 if (RoundTrip.IsChecked == true)
                 {
                     List<Trip> roundTrips = await _mongoDBConnection.SearchTripsAsync(destination, departure, returnDateString);
-                    var filteredRoundTrips = roundTrips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
+                    //var filteredRoundTrips = roundTrips.Where(trip => CountEmptySeats(trip) >= ticketCount).ToList();
 
-                    _originalRoundTrips = filteredRoundTrips;
-                    DisplayRoundTrips(filteredTrips, filteredRoundTrips);
+                    _originalRoundTrips = roundTrips;
+                    DisplayRoundTrips(trips, roundTrips);
+
+                    stopwatch.Stop();
                 }
                 else
                 {
-                    DisplayTrips(filteredTrips);
-                }
+                    DisplayTrips(trips);
 
-                stopwatch.Stop();
-                Debug.WriteLine($"Thời gian tìm chuyến: 3405 ms");
+                    stopwatch.Stop();
+                }
+                Debug.WriteLine($"Thời gian tìm chuyến: {stopwatch.ElapsedMilliseconds} ms");
             }
             catch (Exception ex)
             {
