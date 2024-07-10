@@ -58,6 +58,19 @@ namespace FutaBuss.DataAccess
             }
         }
 
+        public void DeleteKey(string key)
+        {
+            try
+            {
+                _db.KeyDelete(key);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Redis delete key error: " + ex.Message, ex);
+            }
+        }
+
+
         public void CacheBooking(Guid id, Guid userId, List<string> seatIds)
         {
             var bookingData = new Dictionary<string, string>();
@@ -123,9 +136,9 @@ namespace FutaBuss.DataAccess
         }
 
 
-        public void SetPaymentWaitToPay(Guid paymentId)
+        public void SetBookingWaitToPay(Guid bookingId)
         {
-            var key = $"payment:{paymentId}:wait_to_pay";
+            var key = $"booking:{bookingId}:wait_to_pay";
             var value = "WAITING"; // Or any appropriate value
             var expiry = TimeSpan.FromMinutes(15); // Adjust expiry time as needed
             var expiryTime = DateTime.UtcNow.Add(expiry);
@@ -134,10 +147,20 @@ namespace FutaBuss.DataAccess
             _db.KeyExpire(key, expiryTime);
         }
 
-        public string GetPaymentWaitToPay(Guid paymentId)
+        public string GetBookingWaitToPay(Guid bookingId)
         {
-            var key = $"payment:{paymentId}:wait_to_pay";
+            var key = $"booking:{bookingId}:wait_to_pay";
             return _db.StringGet(key);
         }
+
+        public int GetBookingTTL(Guid bookingId)
+        {
+            var key = $"booking:{bookingId}:wait_to_pay";
+            var ttl = _db.KeyTimeToLive(key);
+
+            // Chuyển đổi TTL thành số giây nếu không null
+            return (int)ttl?.TotalSeconds;
+        }
+
     }
 }

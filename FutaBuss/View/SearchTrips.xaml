@@ -43,7 +43,7 @@
             </Setter>
         </Style>
     </Page.Resources>
-    <Grid Width="1360" Height="720" VerticalAlignment="Top" Background="#f3f3f5" >
+    <Grid Width="1200" Height="700" VerticalAlignment="Top" Background="#f3f3f5" >
         <Border Height="170" Width="1100" VerticalAlignment="Top" BorderThickness="5" CornerRadius="13" BorderBrush="#7FAB8F81" Margin="0,20,0,0" Background="White">
             <Border BorderBrush="#FFFA5400" BorderThickness="1" CornerRadius="10" Padding="10" Height="160" Width="1090" RenderTransformOrigin="0.5,0.5">
                 <Border.RenderTransform>

@@ -8,10 +8,15 @@
       d:DesignHeight="700" d:DesignWidth="1200"
       Title="PaymentSuccess">
 
+    <Page.Resources>
+       
+       
+    </Page.Resources>
+
     <Grid Background="White">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
             <Image Source="../Images/payment_success.jpg" Width="100" Height="100" HorizontalAlignment="Center"/>
-            <TextBlock Text="Mua vé xe thành công" FontSize="24" FontWeight="Bold" Foreground="#2D9CDB" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+            <TextBlock Text="Mua vé xe thành công" FontSize="24" FontWeight="Bold" Foreground="#2D9CDB" HorizontalAlignment="Center" Margin="0,0,0,0"/>
             <TextBlock Text="FUTA Bus Lines đã gửi thông tin vé đã đặt về địa chỉ email duong.nguyen@vato.vn. Vui lòng kiểm tra lại." 
                        FontSize="16" Foreground="#828282" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0"/>
 
@@ -35,8 +40,8 @@
                             <TextBlock Text="Tổng giá vé:" FontWeight="Bold" Grid.Column="2" Grid.ColumnSpan="3" Margin="197,-11,269,11"/>
                             <TextBlock Text="2,000,000đ" Grid.Column="3" Grid.ColumnSpan="2" Margin="55,-11,129,11"/>
 
-                            <TextBlock Text="Số điện thoại:" FontWeight="Bold" Grid.Column="0" Margin="0,7,79,3" Grid.ColumnSpan="2"/>
-                            <TextBlock Text="0912345678" Grid.Column="1" Margin="99,7,241,3" Grid.ColumnSpan="4"/>
+                            <TextBlock Text="Số điện thoại:" FontWeight="Bold" Grid.Column="0" Margin="0,10,79,0" Grid.ColumnSpan="2"/>
+                            <TextBlock Text="0912345678" Grid.Column="1" Margin="99,10,241,0" Grid.ColumnSpan="4"/>
                             <TextBlock Text="PTTT:" FontWeight="Bold" Grid.Column="2" Margin="197,7,305,3" Grid.ColumnSpan="3"/>
                             <TextBlock Text="FUTAPay" Grid.Column="3" Margin="54,7,129,3" Grid.ColumnSpan="2"/>
 
@@ -49,7 +54,7 @@
                 </Border>
             </Grid>
 
-            <ItemsControl Margin="0,20,0,0">
+            <ItemsControl Margin="0,0,0,0">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
@@ -72,5 +77,35 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
+
+        <Grid Margin="0,150,0,0">
+            <ListView x:Name="carouselListView" 
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="200" Height="200" Margin="5" Background="LightBlue">
+                            <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <!-- Previous and Next buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+                <Button Content="Previous" Click="PreviousButton_Click"/>
+                <Button Content="Next" Click="NextButton_Click" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Grid>
+
+
+
+
     </Grid>
 </Page>

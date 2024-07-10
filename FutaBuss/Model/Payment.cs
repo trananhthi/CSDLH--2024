@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace FutaBuss.Model
 {
-    class Payment
+    public class Payment
     {
         public Guid Id { get; set; }
         public DateTime PaidAt { get; set; }

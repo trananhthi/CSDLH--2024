@@ -22,20 +22,43 @@ namespace FutaBuss.View
         private DispatcherTimer timer;
         private int countdownSeconds = 100; // Thời gian đếm ngược, đơn vị là giây
         private FutaBuss.Model.Booking booking;
+        private FutaBuss.Model.Booking returnBooking;
         private FutaBuss.Model.Customer customer;
         private FutaBuss.Model.Trip trip;
-        int totalPriceTrip = 0;
+        private FutaBuss.Model.Trip returnTrip;
+        private int totalPriceTrip = 0;
+        private int returnTotalPriceTrip = 0;
+        private string paymentMethod;
+
+        private List<BookingSeat> bookingSeatList;
+        private List<BookingSeat> returnBookingSeatList;
 
         private MongoDBConnection _mongoDBConnection;
         private RedisConnection _redisConnection;
         private PostgreSQLConnection _postgreSQLConnection;
         private CassandraDBConnection _cassandraDBConnection;
+        private SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
         public PaymentMethod(Guid bookingId, Guid? returnBookingId = null)
         {
             InitializeComponent();
             InitializeDatabaseConnections();
-           
+            if(returnBookingId != null)
+            {
+                returnTripTab.Visibility = Visibility.Visible;
+            }    
+            if (_redisConnection.GetBookingWaitToPay(bookingId) != null)
+            {
+                countdownSeconds = _redisConnection.GetBookingTTL(bookingId);
+            } 
+            else
+            {
+                _redisConnection.SetBookingWaitToPay(bookingId);
+                countdownSeconds = 20;
+            }
+
+            
+
             futaPayRadioButton.IsChecked = true;
             StartCountdown();
             InitializeAsync(bookingId, returnBookingId);
@@ -45,12 +68,20 @@ namespace FutaBuss.View
 
         public async Task InitializeAsync(Guid bookingId, Guid? returnBookingId = null)
         {
-            booking = await GetBookingAsync(bookingId); 
+            
+            booking = await GetBookingAsync(bookingId);
+              
+            
             customer = await GetCustomerAsync(booking.UserId);
             trip = await GetTripAsync(booking.TripId);
+            if (returnBookingId != null)
+            {
+                returnBooking = await GetBookingAsync((Guid)returnBookingId);
+                returnTrip = await GetTripAsync(returnBooking.TripId);
+                LoadReturnTripInfo(returnTrip);
+            }
             LoadCustomerInfo(customer);
             LoadTripInfo(trip);
-            LoadTotalPriceInfo();
         }
 
         private void InitializeDatabaseConnections()
@@ -158,6 +189,30 @@ namespace FutaBuss.View
             }
         }
 
+
+        private async Task createNewPayment(Payment payment)
+        {
+            try
+            {
+                await _cassandraDBConnection.CreatePaymentAsync(payment);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving booking: {ex.Message}");
+                throw; 
+            }
+        }
+
+        public async Task UpdateBooking(Guid bookingId, Guid paymentId)
+        {
+            await _cassandraDBConnection.CreateTicketsAsync(bookingId, paymentId);
+        }
+
+        //public async Task UpdateSeatIsSoldAsync(string tripId, string seatId)
+        //{
+        //    await _mongoDBConnection.UpdateSeatIsSoldAsync(tripId, seatId);
+        //}
+
         private void LoadCustomerInfo (FutaBuss.Model.Customer customer)
         {
             fullName.Text = customer.FullName;
@@ -178,15 +233,26 @@ namespace FutaBuss.View
 
             // Định dạng chuỗi để hiển thị
             boardingTime.Text = $"Trước {boardingDateTime:hh\\:mm dd/MM/yyyy}";
-            string departure_province = await GetProvinceName(trip.DepartureProvinceCode);
-            string destination_province = await GetProvinceName(trip.DestinationProvinceCode);
+            await semaphore.WaitAsync();
+            string departure_province;
+            string destination_province ;
+            try
+            {
+                departure_province = await GetProvinceName(trip.DepartureProvinceCode);
+                destination_province = await GetProvinceName(trip.DestinationProvinceCode);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+            
             provincePlace.Text = departure_province + " - " + destination_province;
             int numberOfSeat = await CountSeat(booking.Id);
             noSeat.Text = numberOfSeat.ToString() + " Ghế";
             totalPrice.Text = $"{(numberOfSeat * trip.Price):#,0}đ";
             totalPriceTrip = numberOfSeat * trip.Price;
 
-            List<BookingSeat> bookingSeatList = await GetAllBookingSeat(booking.Id);
+            bookingSeatList = await GetAllBookingSeat(booking.Id);
             List<string> bookingSeatAliasList = new List<string>();
 
             foreach (BookingSeat bookingSeat in bookingSeatList)
@@ -196,8 +262,7 @@ namespace FutaBuss.View
                 {
                     bookingSeatAliasList.Add(alias);
                 }
-                // Nếu bạn muốn thêm một giá trị mặc định khi alias là null:
-                // bookingSeatAliasList.Add(alias ?? "Unknown");
+                
             }
             string result = string.Join(", ", bookingSeatAliasList);
             aliasSeat.Text = result;
@@ -206,10 +271,63 @@ namespace FutaBuss.View
 
         }
 
+
+        private async void LoadReturnTripInfo(FutaBuss.Model.Trip trip)
+        {
+            returnDepartureTime.Text = $"{trip.DepartureTime:hh\\:mm} {trip.DepartureDate:dd/MM/yyyy}";
+            // Lấy giờ khởi hành và ngày khởi hành từ trip
+            var departureDateTime = trip.DepartureDate.Date + trip.DepartureTime;
+
+            // Tính toán boarding time là departure time trừ đi 15 phút
+            var boardingDateTime = departureDateTime.AddMinutes(-15);
+
+            // Định dạng chuỗi để hiển thị
+            returnBoardingTime.Text = $"Trước {boardingDateTime:hh\\:mm dd/MM/yyyy}";
+            await semaphore.WaitAsync();
+            string departure_province;
+            string destination_province;
+            try
+            {
+                departure_province = await GetProvinceName(trip.DepartureProvinceCode);
+                destination_province = await GetProvinceName(trip.DestinationProvinceCode);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+            returnProvincePlace.Text = departure_province + " - " + destination_province;
+            int numberOfSeat = await CountSeat(booking.Id);
+            returnNoSeat.Text = numberOfSeat.ToString() + " Ghế";
+            returnTotalPrice.Text = $"{(numberOfSeat * trip.Price):#,0}đ";
+            returnTotalPriceTrip = numberOfSeat * trip.Price;
+
+            returnBookingSeatList = await GetAllBookingSeat(booking.Id);
+            List<string> bookingSeatAliasList = new List<string>();
+
+            foreach (BookingSeat bookingSeat in returnBookingSeatList)
+            {
+                string alias = GetSeatAlias(bookingSeat.SeatId, trip);
+                if (alias != null)
+                {
+                    bookingSeatAliasList.Add(alias);
+                }
+
+            }
+            string result = string.Join(", ", bookingSeatAliasList);
+            returnAliasSeat.Text = result;
+            returnPickUpLocation.Text = GetPickUpPlace(booking.PickUpLocationId, trip);
+
+        }
+
         private void LoadTotalPriceInfo()
         {
             totalTicketPrice.Text = $"{(totalPriceTrip):#,0}đ" ;
-            finalTotalPrice.Text = $"{(totalPriceTrip):#,0}đ";
+            if(returnBooking != null)
+            {
+                returnTotalTicketPrice.Text = $"{(returnTotalPriceTrip):#,0}đ";
+            }    
+            finalTotalPrice.Text = $"{(totalPriceTrip + returnTotalPriceTrip):#,0}đ";
+            finalTotalPriceHeader.Text = $"{(totalPriceTrip + returnTotalPriceTrip):#,0}đ";
         }    
 
 
@@ -244,7 +362,14 @@ namespace FutaBuss.View
             if (countdownSeconds == 0)
             {
                 timer.Stop();
-                MessageBox.Show("Countdown finished!. Return Home Page");
+                cancelPayment();
+                MessageBoxResult result = MessageBox.Show("Hết thời gian giữ chỗ!. Quay về trang chủ", "Hết thời gian", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Kiểm tra nếu người dùng nhấn OK
+                if (result == MessageBoxResult.OK)
+                {
+                    this.NavigationService.Navigate(new FutaBuss.View.SearchTrips());
+                }
             }
         }
 
@@ -347,6 +472,7 @@ namespace FutaBuss.View
         {
             RadioButton checkedRadioButton = sender as RadioButton;
             string data = fullName.Text + '-' + phoneNumber.Text + '-' + email.Text + '-' + Path.GetFileNameWithoutExtension(checkedRadioButton.Tag.ToString()); // Replace with your actual data
+            paymentMethod = Path.GetFileNameWithoutExtension(checkedRadioButton.Tag.ToString());
             UpdateQRCodeImage(data);
             UpdateQRCodeLogo(checkedRadioButton.Tag.ToString());
 
@@ -382,6 +508,87 @@ namespace FutaBuss.View
 
             // Trả về null hoặc một giá trị mặc định nếu không tìm thấy
             return null;
+        }
+
+        private async void PaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            string transactionCode = new string(Enumerable.Repeat(chars, 10) // 10 characters long
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            Guid newPaymentId = Guid.NewGuid();
+
+            Payment payment = new Payment
+            {
+                Id = newPaymentId, // Tạo GUID mới
+                PaidAt = DateTime.UtcNow, // Thời điểm thanh toán (thời gian hiện tại UTC)
+                Platform = paymentMethod, // Nền tảng thanh toán
+                Status = "Success", // Trạng thái thanh toán (có thể là Pending, Completed, Failed, etc.)
+                TransactionCode = transactionCode  // Mã giao dịch
+            };
+            await createNewPayment(payment);
+            await UpdateBooking(booking.Id, newPaymentId);
+            if(returnBooking != null)
+            {
+                await UpdateBooking(returnBooking.Id, newPaymentId);
+            }
+            
+            _redisConnection.DeleteKey($"booking:{booking.Id}:wait_to_pay");
+
+            foreach (BookingSeat bookingSeat in bookingSeatList)
+            {
+                _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId.ToString().Replace("-","")}");
+
+            }
+
+            if (returnBooking != null)
+            {
+                foreach (BookingSeat bookingSeat in returnBookingSeatList)
+                {
+                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+
+                }
+            }
+
+            
+
+            this.NavigationService.Navigate(new PaymentSuccess());
+
+        }
+
+        private void cancelPayment ()
+        {
+            _redisConnection.DeleteKey($"booking:{booking.Id}:wait_to_pay");
+
+            foreach (BookingSeat bookingSeat in bookingSeatList)
+            {
+                _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+
+            }
+
+            if (returnBooking != null)
+            {
+                foreach (BookingSeat bookingSeat in returnBookingSeatList)
+                {
+                    _redisConnection.DeleteKey($"booking:{booking.Id}:seat:{bookingSeat.SeatId}");
+
+                }
+            }
+
+
+        }
+
+        private void CancelPaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Bạn có chắc muốn hủy thanh toán không?", "Xác nhận hủy thanh toán", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                cancelPayment();
+                this.NavigationService.Navigate(new FutaBuss.View.SearchTrips());
+            }
+            
         }
     }
 }

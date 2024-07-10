@@ -111,14 +111,15 @@ namespace FutaBuss.DataAccess
             var tasks = tickets.Select(ticket =>
                 _session.ExecuteAsync(new SimpleStatement(
                     "INSERT INTO Ticket (id, customer_id, trip_id, seat_id, pickup_location_id, dropoff_location_id, payment_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    ticket.Id, ticket.CustomerId, ticket.TripId, ticket.SeatId, ticket.PickUpLocationId, ticket.DropOffLocationId, ticket.PaymentId))
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   ticket.Id, ticket.CustomerId, ticket.TripId, ticket.SeatId, ticket.PickUpLocationId, ticket.DropOffLocationId, ticket.PaymentId))
             );
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
 
             var mongoDB = MongoDBConnection.Instance;
-            var updateTasks = bookingSeats.Select(bookingSeat => mongoDB.UpdateSeatIsSoldAsync(booking.TripId.ToString(), bookingSeat.SeatId.ToString()));
+            var test = booking.TripId.ToString();
+            var updateTasks = bookingSeats.Select(bookingSeat => mongoDB.UpdateSeatIsSoldAsync(booking.TripId.ToString(), bookingSeat.SeatId.ToString().Replace("-", "")));
             await Task.WhenAll(updateTasks).ConfigureAwait(false);
         }
 
@@ -144,7 +145,7 @@ namespace FutaBuss.DataAccess
 
         public async Task<List<BookingSeat>> GetBookingSeatsByBookingIdAsync(Guid bookingId)
         {
-            var statement = new SimpleStatement("SELECT * FROM BookingSeat WHERE booking_id = ?", bookingId);
+            var statement = new SimpleStatement("SELECT * FROM BookingSeat WHERE booking_id = ? ALLOW FILTERING", bookingId);
             var bookingSeatRows = await _session.ExecuteAsync(statement).ConfigureAwait(false);
 
             var bookingSeats = new List<BookingSeat>();
@@ -275,29 +276,29 @@ namespace FutaBuss.DataAccess
         }
 
 
-        //public async Task CreatePaymentAsync(Payment payment)
-        //{
-        //    try
-        //    {
-        //        // Insert query for Payment
-        //        var insertPaymentQuery = "INSERT INTO Payment (id, paid_at, platform, status, transaction_code) VALUES (?, ?, ?, ?, ?)";
-        //        var preparedStatement = await _session.PrepareAsync(insertPaymentQuery);
+        public async Task CreatePaymentAsync(Payment payment)
+        {
+            try
+            {
+                // Insert query for Payment
+                var insertPaymentQuery = "INSERT INTO Payment (id, paid_at, platform, status, transaction_code) VALUES (?, ?, ?, ?, ?)";
+                var preparedStatement = await _session.PrepareAsync(insertPaymentQuery);
 
-        //        var boundStatement = preparedStatement.Bind(
-        //            payment.Id,
-        //            payment.PaidAt,
-        //            payment.Platform,
-        //            payment.Status,
-        //            payment.TransactionCode
-        //        );
+                var boundStatement = preparedStatement.Bind(
+                    payment.Id,
+                    payment.PaidAt,
+                    payment.Platform,
+                    payment.Status,
+                    payment.TransactionCode
+                );
 
-        //        await _session.ExecuteAsync(boundStatement).ConfigureAwait(false);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new ApplicationException("Error creating payment: " + ex.Message, ex);
-        //    }
-        //}
+                await _session.ExecuteAsync(boundStatement).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error creating payment: " + ex.Message, ex);
+            }
+        }
 
 
 
