@@ -117,7 +117,7 @@ namespace FutaBuss.View
             }
         }
 
-        private async Task<FutaBuss.Model.Customer> GetCustomerAsync(Guid customerId)
+        private async Task<FutaBuss.Model.User> GetCustomerAsync(Guid customerId)
         {
             try
             {

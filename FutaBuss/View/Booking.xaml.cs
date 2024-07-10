@@ -424,7 +424,14 @@ namespace FutaBuss.View
             };
 
             await _cassandraDBConnection.CreateCustomerAsync(customer);
-            var createdAt = DateTime.UtcNow;
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var utcNow = DateTime.UtcNow;
+            // Chuyển đổi thời gian UTC sang giờ địa phương của múi giờ GMT+7
+            var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+
+            // Tạo biến createdAt với thời gian đúng múi giờ
+            var createdAt = localTime;
+
             var deapartureBooking = new FutaBuss.Model.Booking()
             {
                 Id = Guid.NewGuid(),
