@@ -1,6 +1,7 @@
 ﻿using Cassandra;
 using FutaBuss.Model;
 using System.IO;
+using System.Windows.Controls.Primitives;
 
 namespace FutaBuss.DataAccess
 {
@@ -111,14 +112,15 @@ namespace FutaBuss.DataAccess
             var tasks = tickets.Select(ticket =>
                 _session.ExecuteAsync(new SimpleStatement(
                     "INSERT INTO Ticket (id, customer_id, trip_id, seat_id, pickup_location_id, dropoff_location_id, payment_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    ticket.Id, ticket.CustomerId, ticket.TripId, ticket.SeatId, ticket.PickUpLocationId, ticket.DropOffLocationId, ticket.PaymentId))
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   ticket.Id, ticket.CustomerId, ticket.TripId, ticket.SeatId, ticket.PickUpLocationId, ticket.DropOffLocationId, ticket.PaymentId))
             );
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
 
             var mongoDB = MongoDBConnection.Instance;
-            var updateTasks = bookingSeats.Select(bookingSeat => mongoDB.UpdateSeatIsSoldAsync(booking.TripId.ToString(), bookingSeat.SeatId.ToString()));
+            var test = booking.TripId.ToString();
+            var updateTasks = bookingSeats.Select(bookingSeat => mongoDB.UpdateSeatIsSoldAsync(booking.TripId.ToString(), bookingSeat.SeatId.ToString().Replace("-", "")));
             await Task.WhenAll(updateTasks).ConfigureAwait(false);
         }
 
@@ -144,7 +146,7 @@ namespace FutaBuss.DataAccess
 
         public async Task<List<BookingSeat>> GetBookingSeatsByBookingIdAsync(Guid bookingId)
         {
-            var statement = new SimpleStatement("SELECT * FROM BookingSeat WHERE booking_id = ?", bookingId);
+            var statement = new SimpleStatement("SELECT * FROM BookingSeat WHERE booking_id = ? ALLOW FILTERING", bookingId);
             var bookingSeatRows = await _session.ExecuteAsync(statement).ConfigureAwait(false);
 
             var bookingSeats = new List<BookingSeat>();
@@ -182,7 +184,9 @@ namespace FutaBuss.DataAccess
                     Id = row.GetValue<Guid>("id"),
                     UserId = row.GetValue<Guid>("user_id"),
                     TripId = row.GetValue<string>("trip_id"),
-                    CreatedAt = row.GetValue<DateTime>("created_at")
+                    CreatedAt = row.GetValue<DateTime>("created_at"),
+                    PickUpLocationId = row.GetValue<Guid>("pickup_location_id"),
+                    DropOffLocationId = row.GetValue<Guid>("dropoff_location_id"),
                     // Các trường thông tin khác của Booking nếu có
                 };
 
@@ -219,5 +223,118 @@ namespace FutaBuss.DataAccess
 
             return null; // Trả về null nếu không tìm thấy booking có id tương ứng
         }
+
+        public async Task<int> CountSeat(Guid bookingId)
+        {
+            try
+            {
+                var statement = new SimpleStatement("SELECT COUNT(*) FROM BookingSeat WHERE booking_id = ? ALLOW FILTERING", bookingId);
+                var resultSet = await _session.ExecuteAsync(statement).ConfigureAwait(false);
+
+                var row = resultSet.FirstOrDefault();
+                if (row != null)
+                {
+                    var count = row.GetValue<long>("count"); // Sử dụng GetValue<long>() để lấy giá trị long từ Cassandra
+                    return (int)count; // Ép kiểu long về int
+                }
+
+                return 0; // Trả về 0 nếu không tìm thấy số lượng ghế đặt cho bookingId tương ứng
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error counting seats: " + ex.Message, ex);
+            }
+        }
+
+
+        public async Task<List<BookingSeat>> GetAllBookingSeats(Guid bookingId)
+        {
+            try
+            {
+                var statement = new SimpleStatement("SELECT * FROM BookingSeat WHERE booking_id = ? ALLOW FILTERING", bookingId);
+                var resultSet = await _session.ExecuteAsync(statement).ConfigureAwait(false);
+
+                var bookingSeats = new List<BookingSeat>();
+                foreach (var row in resultSet)
+                {
+                    var bookingSeat = new BookingSeat
+                    {
+                        // Đọc dữ liệu từ row và map vào đối tượng BookingSeat
+                        Id = row.GetValue<Guid>("id"),
+                        BookingId = row.GetValue<Guid>("booking_id"),
+                        SeatId = row.GetValue<Guid>("seat_id"),
+                        // Thêm các trường dữ liệu khác tương ứng với cấu trúc của BookingSeat
+                    };
+                    bookingSeats.Add(bookingSeat);
+                }
+
+                return bookingSeats;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error retrieving booking seats: " + ex.Message, ex);
+            }
+        }
+
+
+        public async Task CreatePaymentAsync(Payment payment)
+        {
+            try
+            {
+                // Insert query for Payment
+                var insertPaymentQuery = "INSERT INTO Payment (id, paid_at, platform, status, transaction_code) VALUES (?, ?, ?, ?, ?)";
+                var preparedStatement = await _session.PrepareAsync(insertPaymentQuery);
+
+                var boundStatement = preparedStatement.Bind(
+                    payment.Id,
+                    payment.PaidAt,
+                    payment.Platform,
+                    payment.Status,
+                    payment.TransactionCode
+                );
+
+                await _session.ExecuteAsync(boundStatement).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error creating payment: " + ex.Message, ex);
+            }
+        }
+        
+
+        public List<Ticket> GetAllTicketByPaymentId(Guid paymentId)
+        {
+            try
+            {
+                var statement = new SimpleStatement("SELECT * FROM Ticket WHERE payment_id = ? ALLOW FILTERING", paymentId);
+                var resultSet = _session.Execute(statement);
+
+                var tickets = new List<Ticket>();
+                foreach (var row in resultSet)
+                {
+                    var ticket = new Ticket
+                    {
+                        Id = row.GetValue<Guid>("id"),
+                        CustomerId = row.GetValue<Guid>("customer_id"),
+                        SeatId = row.GetValue<Guid>("seat_id"),
+                        TripId = row.GetValue<string>("trip_id"),
+                        PickUpLocationId = row.GetValue<Guid>("pickup_location_id"),
+                        DropOffLocationId = row.GetValue<Guid>("dropoff_location_id"),
+                        PaymentId = row.GetValue<Guid>("payment_id"),
+                    };
+                    tickets.Add(ticket);
+                }
+
+                return tickets;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error retrieving booking seats: " + ex.Message, ex);
+            }
+        }
+
+
+
+
     }
 }

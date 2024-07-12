@@ -128,5 +128,36 @@ namespace FutaBuss.DataAccess
                 await CloseConnectionAsync();
             }
         }
+
+        public async Task<string> GetProvinceNameByCodeAsync(string code)
+        {
+            try
+            {
+                await OpenConnectionAsync();
+                await using (var command = new NpgsqlCommand("SELECT name FROM provinces WHERE code = @code", _connection))
+                {
+                    command.Parameters.AddWithValue("@code", code);
+                    var result = await command.ExecuteScalarAsync();
+                    if (result != null)
+                    {
+                        return result.ToString();
+                    }
+                    else
+                    {
+                        return null; // hoặc xử lý khi không tìm thấy mã tỉnh
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("PostgreSQL query error: " + ex.Message, ex);
+            }
+            finally
+            {
+                await CloseConnectionAsync();
+            }
+        }
+
+
     }
 }

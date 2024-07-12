@@ -8,10 +8,70 @@
       d:DesignHeight="700" d:DesignWidth="1200"
       Title="PaymentSuccess">
 
+    <Page.Resources>
+
+        <DataTemplate x:Key="CarouselItemTemplate">
+            <Border Background="Wheat" Width="250" Height="350" BorderThickness="1" BorderBrush="Gray" CornerRadius="10" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <!-- Header Section -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="&#xE10A;" FontFamily="Segoe MDL2 Assets" Width="30" Height="30" Background="Transparent" BorderBrush="Transparent"/>
+                        <Button Content="&#xE72D;" FontFamily="Segoe MDL2 Assets" Width="30" Height="30" Background="Transparent" BorderBrush="Transparent"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding TicketId}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" TextAlignment="Center"/>
+
+                    <!-- QR Code Section -->
+                    <Image Source="{Binding ImageSource}" Width="100" Height="100" HorizontalAlignment="Center" Margin="0,10,0,10"/>
+
+                    <!-- Ticket Details Section -->
+                    <Grid Margin="0,10,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Tuyến xe:" FontWeight="Bold" Grid.Row="0" Grid.Column="0"/>
+                        <TextBlock Text="{Binding Buses}"  Foreground="Green" Grid.Row="0" Grid.Column="1" FontWeight="Bold" />
+
+                        <TextBlock Text="Thời gian:" FontWeight="Bold" Grid.Row="1" Grid.Column="0" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding Time}" Foreground="Green" Grid.Row="1" Grid.Column="1" Margin="0,5,0,0" FontWeight="Bold"/>
+
+                        <TextBlock Text="Số ghế:" FontWeight="Bold" Grid.Row="2" Grid.Column="0" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding NoSeat}" Foreground="Green" Grid.Row="2" Grid.Column="1" Margin="0,5,0,0" FontWeight="Bold"/>
+
+                        <TextBlock Text="Điểm lên xe:" FontWeight="Bold" Grid.Row="3" Grid.Column="0" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding Place}" Grid.Row="3" Grid.Column="1" Margin="0,5,0,0"/>
+
+
+
+                        <TextBlock Text="Giá vé:" FontWeight="Bold" Grid.Row="5" Grid.Column="0" Margin="0,5,0,0"/>
+                        <TextBlock Foreground="Orange" Text="{Binding Price}" Grid.Row="5" Grid.Column="1" Margin="0,5,0,0" FontWeight="Bold"/>
+                    </Grid>
+
+                    <!-- Note Section -->
+                    <TextBlock Text="Mang mã vé đến văn phòng để đổi vé lên xe trước giờ xuất bến ít nhất 60 phút." 
+                   FontStyle="Italic" FontSize="12" Margin="0,10,0,0" TextAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+    </Page.Resources>
+
     <Grid Background="White">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20">
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
             <Image Source="../Images/payment_success.jpg" Width="100" Height="100" HorizontalAlignment="Center"/>
-            <TextBlock Text="Mua vé xe thành công" FontSize="24" FontWeight="Bold" Foreground="#2D9CDB" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+            <TextBlock Text="Mua vé xe thành công" FontSize="24" FontWeight="Bold" Foreground="#2D9CDB" HorizontalAlignment="Center" Margin="0,0,0,0"/>
             <TextBlock Text="FUTA Bus Lines đã gửi thông tin vé đã đặt về địa chỉ email duong.nguyen@vato.vn. Vui lòng kiểm tra lại." 
                        FontSize="16" Foreground="#828282" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0"/>
 
@@ -31,17 +91,17 @@
                                 <ColumnDefinition Width="271*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Họ và tên:" FontWeight="Bold" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,-11,99,11"/>
-                            <TextBlock Text="Nguyễn Phan Tùng Dương" Grid.Column="1" Grid.ColumnSpan="3" Margin="99,-11,19,11"/>
+                            <TextBlock FontWeight="Bold" x:Name="FullName" Text="" Grid.Column="1" Grid.ColumnSpan="3" Margin="99,-11,19,11"/>
                             <TextBlock Text="Tổng giá vé:" FontWeight="Bold" Grid.Column="2" Grid.ColumnSpan="3" Margin="197,-11,269,11"/>
-                            <TextBlock Text="2,000,000đ" Grid.Column="3" Grid.ColumnSpan="2" Margin="55,-11,129,11"/>
+                            <TextBlock FontWeight="Bold" x:Name="TotalPrice" Text="" Grid.Column="3" Grid.ColumnSpan="2" Margin="55,-11,129,11"/>
 
-                            <TextBlock Text="Số điện thoại:" FontWeight="Bold" Grid.Column="0" Margin="0,7,79,3" Grid.ColumnSpan="2"/>
-                            <TextBlock Text="0912345678" Grid.Column="1" Margin="99,7,241,3" Grid.ColumnSpan="4"/>
+                            <TextBlock Text="Số điện thoại:" FontWeight="Bold" Grid.Column="0" Margin="0,10,79,0" Grid.ColumnSpan="2"/>
+                            <TextBlock FontWeight="Bold" x:Name="PhoneNumber" Text="" Grid.Column="1" Margin="99,10,241,0" Grid.ColumnSpan="4"/>
                             <TextBlock Text="PTTT:" FontWeight="Bold" Grid.Column="2" Margin="197,7,305,3" Grid.ColumnSpan="3"/>
-                            <TextBlock Text="FUTAPay" Grid.Column="3" Margin="54,7,129,3" Grid.ColumnSpan="2"/>
+                            <TextBlock FontWeight="Bold" Name="PaymentMethod" Text="" Grid.Column="3" Margin="54,7,129,3" Grid.ColumnSpan="2"/>
 
                             <TextBlock Text="Email:" FontWeight="Bold" Grid.Column="0" Margin="0,28,79,-18" Grid.ColumnSpan="2"/>
-                            <TextBlock Text="duong.nguyen@futa.vn" Margin="99,28,89,-18" Grid.Column="1" Grid.ColumnSpan="3"/>
+                            <TextBlock FontWeight="Bold" x:Name="Email" Text="" Margin="99,28,89,-18" Grid.Column="1" Grid.ColumnSpan="3"/>
                             <TextBlock Text="Trạng thái:" FontWeight="Bold" Grid.Column="2" Margin="197,26,269,-16" Grid.ColumnSpan="3"/>
                             <TextBlock Text="Thanh toán thành công" Foreground="#27ae60" Grid.Column="3" Margin="54,26,129,-16" Grid.ColumnSpan="2"/>
                         </Grid>
@@ -49,7 +109,7 @@
                 </Border>
             </Grid>
 
-            <ItemsControl Margin="0,20,0,0">
+            <ItemsControl Margin="0,0,0,0">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
@@ -72,5 +132,73 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
+
+        <Grid Margin="0,270,0,0">
+            <ListView x:Name="carouselListView" 
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                  ItemTemplate="{StaticResource CarouselItemTemplate}">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <!--<ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="200" Height="200" Margin="5" Background="LightBlue">
+                            <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>-->
+            </ListView>
+
+            <!-- Previous and Next buttons -->
+            <Grid  HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+
+
+                <Button Content="&#x276E;" Click="PreviousButton_Click" Margin="-568,-198,568,198"
+                Width="35" Height="35"  Cursor="Hand"
+                HorizontalAlignment="Left" VerticalAlignment="Center"
+                Background="LightGray" BorderBrush="Gray" 
+                FontSize="24" FontWeight="Bold">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="25" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Button Content="&#x276F;" Click="NextButton_Click" Margin="575,-197,-564,198"
+                Width="35" Height="35" 
+                HorizontalAlignment="Right" VerticalAlignment="Center"
+                Background="LightGray" BorderBrush="Gray" Cursor="Hand"
+                FontSize="24" FontWeight="Bold">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="25" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                
+            </Grid>
+
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+                <Button Cursor="Hand"  Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Width="100" Height="40" BorderThickness="0" Margin="0,-651,1028,0" Click="Button_Click">
+                    <TextBlock Text="Trang chủ" FontSize="16" FontWeight="Bold" Foreground="Orange"></TextBlock>
+                </Button>
+            </Grid>
+        </Grid>
+
+
+
+
+
+
     </Grid>
 </Page>

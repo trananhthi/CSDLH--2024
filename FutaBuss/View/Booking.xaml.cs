@@ -457,8 +457,13 @@ namespace FutaBuss.View
                 };
                 _redisConnection.CacheBooking(returnBooking.Id, customer.Id, returnSeatIds);
                 await _cassandraDBConnection.AddBookingAsync(returnBooking, returnSeatIds);
+                this.NavigationService.Navigate(new PaymentMethod(deapartureBooking.Id), returnBooking.Id);
             }
-            this.NavigationService.Navigate(new PaymentMethod(Guid.Parse("e9c7754a-3667-479b-b399-a27e2ee22048")));
+            else
+            {
+                this.NavigationService.Navigate(new PaymentMethod(deapartureBooking.Id));
+            }    
+            
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -517,10 +522,7 @@ namespace FutaBuss.View
             }
         }
 
-        public async Task UpdateBooking(Guid bookingId, Guid paymentId)
-        {
-            await _cassandraDBConnection.CreateTicketsAsync(bookingId, paymentId);
-        }
+        
 
         private void PickUpComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

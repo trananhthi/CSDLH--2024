@@ -55,19 +55,23 @@ namespace FutaBuss.DataAccess
             return await collection.Find(filter).ToListAsync();
         }
 
+
         public async Task UpdateSeatIsSoldAsync(string documentId, string seatId)
         {
             var _collection = GetCollection<BsonDocument>("trips");
             var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(documentId));
 
-            var update = Builders<BsonDocument>.Update.Set("seat_config.seats.$[elem].is_sold", true);
+            var update = Builders<BsonDocument>.Update.Set("seat_config.floors.$[floor].seats.$[seat].is_sold", true);
             var arrayFilters = new List<ArrayFilterDefinition>
-            {
-                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("elem.id", seatId))
-            };
+    {
+        new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("floor.seats.id", seatId)),
+        new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("seat.id", seatId))
+    };
             var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
             await _collection.UpdateOneAsync(filter, update, updateOptions);
         }
+
+
 
         public async Task<Trip> GetTripByIdAsync(string tripId)
         {

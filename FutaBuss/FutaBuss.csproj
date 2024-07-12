@@ -19,6 +19,7 @@
     <None Remove="Images\viettelpay.svg" />
     <None Remove="Images\vnpay.svg" />
     <None Remove="Images\zalo.svg" />
+    <None Remove="Images\zaloqrcode.png" />
     <None Remove="seat_active.png" />
   </ItemGroup>
 
@@ -47,6 +48,7 @@
     <Resource Include="Images\viettelpay.svg" />
     <Resource Include="Images\vnpay.svg" />
     <Resource Include="Images\zalo.svg" />
+    <Resource Include="Images\zaloqrcode.png" />
   </ItemGroup>
 
   <ItemGroup>

@@ -74,12 +74,88 @@
                 </StackPanel>
             </RadioButton>
 
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+            <TextBlock></TextBlock>
+
+            <TextBlock></TextBlock>
+
+            <Button x:Name="PaymentButton" Content="Thanh toán" Cursor="Hand"
+        Click="PaymentButton_Click"
+        Background="Green" Foreground="White" 
+        Padding="10" Height="40" Margin="0,0,0,0">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border x:Name="border"
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="border" Property="Background" Value="LightGreen" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="border" Property="Background" Value="DarkGreen" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <TextBlock></TextBlock>
+            <Button x:Name="CancelPaymentButton" Content="Trở về" Cursor="Hand"
+
+Background="Red" Foreground="White" 
+Padding="10" Height="40" Margin="0,0,0,0" Click="CancelPaymentButton_Click">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="border" Property="Background" Value="LightGreen" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="border" Property="Background" Value="DarkGreen" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+
         </StackPanel>
+
+
 
         <!-- QR Code and Total Amount -->
         <StackPanel Grid.Column="1" Margin="10" HorizontalAlignment="Center">
             <TextBlock Text="Tổng thanh toán" FontWeight="Medium" FontSize="16" HorizontalAlignment="Center" Foreground="#637280"/>
-            <TextBlock Text="580.000đ" FontWeight="Bold" FontSize="48" Foreground="#ef5222" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="finalTotalPriceHeader" Text="" FontWeight="Bold" FontSize="48" Foreground="#ef5222" HorizontalAlignment="Center"/>
 
             <Border Background="#fafafc" CornerRadius="8" Padding="20,10,20,10" MaxWidth="350" Margin="0,20,0,0" >
                 <StackPanel HorizontalAlignment="Center" >
@@ -178,58 +254,121 @@
                 </StackPanel>
             </Border>
 
-            <!--Thông tin lượt đi-->
-            <Border BorderBrush="Gray" BorderThickness="0.5" CornerRadius="10" Padding="10" Margin="10">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="Thông tin lượt đi" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
-                        <Grid Margin="10,0,0,0">
-                            <Ellipse Width="20" Height="20" Fill="White" VerticalAlignment="Center" Stroke="red" StrokeThickness="2"/>
-                            <TextBlock Text="i" Foreground="Red" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+            <TabControl >
+                <!-- Tab 1 -->
+                <TabItem Header="Lượt đi" >
+                    <!--Thông tin lượt đi-->
+                    <Border BorderBrush="Gray" BorderThickness="0.5" CornerRadius="10" Padding="10" Margin="10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="Thông tin lượt đi" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Grid Margin="10,0,0,0">
+                                    <Ellipse Width="20" Height="20" Fill="White" VerticalAlignment="Center" Stroke="red" StrokeThickness="2"/>
+                                    <TextBlock Text="i" Foreground="Red" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Tuyến xe" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="Mien Tay - Da Lat" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Tuyến xe" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="provincePlace" Text="" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Thời gian xuất bến" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="00:30 10/07/2024" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+                                <TextBlock Text="Thời gian xuất bến" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="departureTime" Text="" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Số lượng ghế" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="2 Ghế" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
+                                <TextBlock Text="Số lượng ghế" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="noSeat" Text="" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
 
-                        <TextBlock Text="Số ghế" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="B05, B08" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+                                <TextBlock Text="Số ghế" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="aliasSeat" Text="" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Điểm lên xe" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="BX Mien Tay" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Điểm lên xe" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="pickUpLocation" Text="" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Thời gian tới điểm lên xe" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="Trước 00:15 10/07/2024" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Red"  FontWeight="SemiBold"/>
+                                <TextBlock Text="Thời gian tới điểm lên xe" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="boardingTime" Text="" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Red"  FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Đón tận nơi" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray"  FontWeight="SemiBold"/>
-                        <TextBlock Text="" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
+                                <TextBlock Text="Đón tận nơi" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray"  FontWeight="SemiBold"/>
+                                <TextBlock Text="" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
 
-                        <TextBlock Text="Tổng tiền lượt đi" Grid.Row="7" Grid.Column="0" Margin="0,0,10,0" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="580.000đ" Grid.Row="7" Grid.Column="1" Margin="0,0,0,0" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                                <TextBlock Text="Tổng tiền lượt đi" Grid.Row="7" Grid.Column="0" Margin="0,0,10,0" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="totalPrice" Text="" Grid.Row="7" Grid.Column="1" Margin="0,0,0,0" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 2 -->
+                <TabItem x:Name="returnTripTab" Header="Lượt về" Visibility="Collapsed">
+                    <Border x:Name="returnTripInfo" BorderBrush="Gray" BorderThickness="0.5" CornerRadius="10" Padding="10" Margin="10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="Thông tin lượt về" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Grid Margin="10,0,0,0">
+                                    <Ellipse Width="20" Height="20" Fill="White" VerticalAlignment="Center" Stroke="red" StrokeThickness="2"/>
+                                    <TextBlock Text="i" Foreground="Red" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Tuyến xe" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnProvincePlace" Text="" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
+
+                                <TextBlock Text="Thời gian xuất bến" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnDepartureTime" Text="" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+
+                                <TextBlock Text="Số lượng ghế" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnNoSeat" Text="" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
+
+                                <TextBlock Text="Số ghế" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnAliasSeat" Text="" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+
+                                <TextBlock Text="Điểm lên xe" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnPickUpLocation" Text="" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5" FontSize="14" FontWeight="SemiBold"/>
+
+                                <TextBlock Text="Thời gian tới điểm lên xe" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnBoardingTime" Text="" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Red"  FontWeight="SemiBold"/>
+
+                                <TextBlock Text="Đón tận nơi" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray"  FontWeight="SemiBold"/>
+                                <TextBlock Text="" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5" FontSize="14" />
+
+                                <TextBlock Text="Tổng tiền lượt về" Grid.Row="7" Grid.Column="0" Margin="0,0,10,0" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="returnTotalPrice" Text="" Grid.Row="7" Grid.Column="1" Margin="0,0,0,0" FontSize="14" Foreground="Green" FontWeight="SemiBold"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </TabItem>
+
+
+            </TabControl>
+
 
 
             <!--Chi tiết giá-->
@@ -252,25 +391,31 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Giá vé lượt đi" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="580.000đ" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="#ef5222" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        <TextBlock  Text="Giá vé lượt đi" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="totalTicketPrice" Text="" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="#ef5222" HorizontalAlignment="Right" FontWeight="SemiBold"/>
 
-                        <TextBlock Text="Phí thanh toán" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
-                        <TextBlock Text="0đ" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="Black" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        <TextBlock  Text="Giá vé lượt về" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5" FontSize="14" Foreground="Gray" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="returnTotalTicketPrice" Text="" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5" FontSize="14" Foreground="#ef5222" HorizontalAlignment="Right" FontWeight="SemiBold"/>
 
-                        <Rectangle Grid.Row="2" Grid.ColumnSpan="2" Height="1" Fill="Gray" Margin="0,4,0,24"/>
+                        <TextBlock Text="Phí thanh toán" Grid.Row="1" Grid.Column="0" Margin="0,27,10,15" FontSize="14" Foreground="Gray" FontWeight="SemiBold" Grid.RowSpan="2"/>
+                        <TextBlock Text="0đ" Grid.Row="1" Grid.Column="1" Margin="0,27,0,0" FontSize="14" Foreground="Black" HorizontalAlignment="Right" FontWeight="SemiBold" Grid.RowSpan="2"/>
 
-                        <TextBlock Text="Tổng tiền" Grid.Row="3" Grid.Column="0" Margin="0,10,10,0" FontSize="14" FontWeight="SemiBold"/>
-                        <TextBlock Text="580.000đ" Grid.Row="3" Grid.Column="1" Margin="0,10,0,0" FontSize="14" FontWeight="Bold" Foreground="#ef5222" HorizontalAlignment="Right"/>
+                        <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Height="1" Fill="Gray" Margin="0,10,0,2"/>
+
+                        <TextBlock Text="Tổng tiền" Grid.Row="3" Grid.Column="0" Margin="0,10,10,-10" FontSize="14" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="finalTotalPrice" Text="" Grid.Row="4" Grid.Column="1" Margin="0,10,0,0" FontSize="14" FontWeight="Bold" Foreground="#ef5222" HorizontalAlignment="Right"/>
                     </Grid>
                 </StackPanel>
             </Border>
+
+
         </StackPanel>
     </Grid>
 </Page>
