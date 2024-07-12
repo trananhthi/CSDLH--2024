@@ -10,12 +10,12 @@ namespace FutaBuss.DataAccess
         private readonly ISession _session;
 
         // Cassandra Astra connection details
-        private const string clientId = "NurzkWTRQhNjHRWeddORtjxd";
-        private const string clientSecret = "Zl60ab8yFucPW_Z5.3sO3Cjx4DMlZGJL32Cx5SnyWl_4+GfAkMEFZ3UF44v1ZeRb_hkqzTn,CdSOh4USF2,-tErnBSuiFvTk9JdtOG8YedGArFUn1Ia_uzqSqgkKnA_n";
+        private const string clientId = "yxGhXKGXTDEgzguIipdkkLjk";
+        private const string clientSecret = "J.ZmHN.qLwdZyDPEqlX0J3_L8EjejekPcXnyPf6RDJ2QcBilfkbCMkYRNOqXeAZ_80oEEplFw6HlgKaD_pFDAMtoPbMIshZNRCyZUoqL1nesp8Hilf622njxbiD465Cp";
         //private const string SecureConnectBundlePath = "C:\\Users\\Admin\\Desktop\\NoSQL\\secure-connect-futabus.zip";
-        private static readonly string SecureConnectBundlePath = Path.Combine("..\\..\\..", "Bundle", "secure-connect-futabus.zip");
+        private static readonly string SecureConnectBundlePath = Path.Combine("..\\..\\..", "Bundle", "secure-connect-futabus1.zip");
 
-        private const string Keyspace = "futabus";
+        private const string Keyspace = "futabus1";
 
         // Private constructor to prevent instantiation from outside
         private CassandraDBConnection()
